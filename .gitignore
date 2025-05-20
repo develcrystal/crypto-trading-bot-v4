@@ -1,0 +1,200 @@
+# 🔒 CRYPTO TRADING BOT V2 - SICHERHEITS .GITIGNORE 🔒
+
+# ========================
+# SENSITIVE DATA - NIEMALS COMMITTEN!
+# ========================
+
+# API Keys und Geheimnisse
+.env
+.env.local
+.env.production
+.env.staging
+.env.test
+*.key
+*.secret
+config.local.py
+secrets.json
+api_keys.txt
+
+# Wallet und Private Keys
+*.wallet
+*.pem
+private_keys/
+wallets/
+
+# ========================
+# TRADING DATA & LOGS
+# ========================
+
+# Trading Logs
+*.log
+logs/
+trading_bot.log
+error.log
+debug.log
+
+# Backtest Results (können groß werden)
+backtest_results/*.json
+backtest_results/*.csv
+backtest_results/*.png
+backtest_results/*.html
+backtest_results/
+
+# Trading History
+trades/
+trade_history/
+positions/
+
+# Performance Data
+performance_data/
+metrics/
+
+# ========================
+# DEVELOPMENT & SYSTEM
+# ========================
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environments
+.env/
+.venv/
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+conda/
+
+# IDE & Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+*.ipynb
+
+# Testing
+.coverage
+.pytest_cache/
+.tox/
+.nox/
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+
+# ========================
+# TEMPORARY & CACHE FILES
+# ========================
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+temp/
+tmp/
+
+# Cache directories
+.cache/
+cache/
+.pytest_cache/
+
+# OS generated files
+.DS_Store?
+ehthumbs.db
+Icon?
+
+# ========================
+# ANALYSIS & REPORTS
+# ========================
+
+# Large analysis files
+analysis_plots/
+charts/
+reports/*.pdf
+reports/*.docx
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# ========================
+# DOCKER & DEPLOYMENT
+# ========================
+
+# Docker
+.dockerignore
+docker-compose.override.yml
+
+# Deployment configs
+deployment/
+k8s/
+helm/
+
+# ========================
+# HISTORY & VERSIONING
+# ========================
+
+# History directories (Windsurf/Roo specific)
+.history/
+
+# Git
+.git/
+*.orig
+
+# ========================
+# DOCUMENTATION EXCLUSIONS
+# ========================
+
+# Personal notes und TODO files
+TODO.md
+NOTES.md
+PERSONAL.md
+*.private.md
+
+# Large documentation files
+docs/images/
+docs/videos/
+
+# ========================
+# KEEP THESE FILES (Whitelist)
+# ========================
+# Diese Dateien SOLLEN committed werden:
+# !README.md
+# !requirements.txt
+# !.env.example
+# !config/config.py (nur Template-Werte)
+# !strategies/
+# !backtesting/
+# !utils/
+# !indicators/
+# !*.py (alle Python-Dateien außer sensiblen)
