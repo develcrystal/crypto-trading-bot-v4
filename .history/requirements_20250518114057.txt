@@ -1,0 +1,9 @@
+pandas
+numpy
+matplotlib
+scikit-learn
+pytz
+pytest
+python-dotenv
+seaborn
+mplfinance
