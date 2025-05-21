@@ -1,0 +1,12 @@
+streamlit==1.28.0
+plotly==5.17.0
+pandas==2.1.0
+redis==4.6.0
+websocket-client==1.6.0
+asyncio
+schedule==1.2.0
+smtplib
+numpy
+datetime
+json
+sqlite3
