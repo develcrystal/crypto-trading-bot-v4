@@ -12,13 +12,10 @@ echo.
 
 cd /d "%~dp0"
 
-echo 📦 Checking dependencies...
-python -c "import streamlit" 2>nul
-if errorlevel 1 (
-    echo ⚠️ Installing Streamlit...
-    pip install streamlit plotly pandas numpy
-    echo ✅ Installation complete!
-)
+echo ⚠️ IMPORTANT: Ensure you are in the correct Conda environment!
+echo 📦 Please install dependencies manually if needed:
+echo    pip install -r monitoring/requirements.txt
+echo.
 
 echo.
 echo 🚀 Starting dashboard directly...

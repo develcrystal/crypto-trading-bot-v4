@@ -1,12 +1,5 @@
-streamlit==1.28.0
-plotly==5.17.0
+streamlit==1.31.0
 pandas==2.1.0
-redis==4.6.0
-websocket-client==1.6.0
-asyncio
-schedule==1.2.0
-smtplib
-numpy
-datetime
-json
-sqlite3
+numpy==1.24.0
+plotly==5.18.0
+python-dateutil==2.8.2
