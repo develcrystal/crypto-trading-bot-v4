@@ -49,6 +49,7 @@ def get_bybit_testnet_data():
         
         if response.status_code == 200:
             data = response.json()
+            print("API Response:", data)  # Debugging output
             if data.get('retCode') == 0 and 'result' in data:
                 ticker_list = data['result']['list']
                 if ticker_list:
