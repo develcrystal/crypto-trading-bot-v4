@@ -32,7 +32,7 @@ class LiveBybitTradingBot:
         self.trades_made = 0
         self.total_profit = 0.0
         
-        print("🚀 LIVE BYBIT TRADING BOT INITIALISIERT")
+        print("LIVE BYBIT TRADING BOT INITIALISIERT")
         print(f"API Key: {self.api_key}")
         print(f"Testnet: AKTIV")
         
@@ -73,11 +73,11 @@ class LiveBybitTradingBot:
             if response.status_code == 200:
                 return response.json()
             else:
-                print(f"❌ API Error: {response.status_code} - {response.text}")
+                print(f"API Error: {response.status_code} - {response.text}")
                 return None
                 
         except Exception as e:
-            print(f"❌ Request Error: {e}")
+            print(f"Request Error: {e}")
             return None
     
     def get_account_balance(self):
@@ -216,7 +216,7 @@ class LiveBybitTradingBot:
     def run_live_trading(self, duration_minutes=60):
         """Startet Live Trading Session"""
         print("=" * 70)
-        print("🚀 ENHANCED SMART MONEY LIVE TRADING GESTARTET")
+        print("ENHANCED SMART MONEY LIVE TRADING GESTARTET")
         print("=" * 70)
         print(f"⏱️ Dauer: {duration_minutes} Minuten")
         print(f"💼 Modus: LIVE TESTNET TRADING")
@@ -303,10 +303,10 @@ def main():
         print("❌ API credentials not found in .env file!")
         return
     
-    print("🚀 ENHANCED SMART MONEY LIVE TRADING BOT")
+    print("ENHANCED SMART MONEY LIVE TRADING BOT")
     print("=" * 70)
-    print("⚠️  This bot will make REAL trades on your Bybit Testnet account!")
-    print("💰 Your 583 USDT balance will be used for actual trading.")
+    print("WARNING: This bot will make REAL trades on your Bybit Testnet account!")
+    print("Your balance will be used for actual trading.")
     print("=" * 70)
     
     # Initialize bot
@@ -315,27 +315,27 @@ def main():
     # Test API connection first
     balances = bot.get_account_balance()
     if balances:
-        print("✅ API Connection successful!")
-        print("💰 Available balance:")
+        print("API Connection successful!")
+        print("Available balance:")
         for coin, amount in balances.items():
             if coin == 'USDT':
                 print(f"   {coin}: {amount:.2f}")
     else:
-        print("❌ API Connection failed!")
+        print("API Connection failed!")
         return
     
     # Get trading duration
     try:
-        duration = int(input(f"\n⏱️ Enter trading duration in minutes (default: 60): ") or "60")
+        duration = int(input(f"\nEnter trading duration in minutes (default: 60): ") or "60")
     except ValueError:
         duration = 60
     
-    print(f"\n🚀 Starting {duration}-minute LIVE trading session...")
-    print("⚠️  This will place REAL orders on your Bybit Testnet account!")
+    print(f"\nStarting {duration}-minute LIVE trading session...")
+    print("WARNING: This will place REAL orders on your Bybit Testnet account!")
     
-    confirm = input("🎯 Continue with live trading? (y/N): ").lower()
+    confirm = input("Continue with live trading? (y/N): ").lower()
     if confirm != 'y':
-        print("❌ Trading cancelled by user.")
+        print("Trading cancelled by user.")
         return
     
     try:

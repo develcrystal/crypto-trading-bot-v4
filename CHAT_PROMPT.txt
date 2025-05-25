@@ -1,0 +1,25 @@
+URGENT LIVE TRADING STATUS CHECK:
+
+Mein Enhanced Smart Money Trading Bot läuft seit 19:05 Uhr LIVE auf Bybit Mainnet mit 50€ echtem Geld für 8 Stunden (bis 03:05). 
+
+SOFORT PRÜFEN:
+1. Bot Status: J:\Meine Ablage\CodingStuff\crypto-bot_V2\live_trading_bot.log
+2. Dashboard: http://localhost:8507
+3. Prozess läuft: tasklist | findstr python
+
+SYSTEM INFO:
+- Pfad: J:\Meine Ablage\CodingStuff\crypto-bot_V2\
+- Bot File: enhanced_live_bot.py  
+- Config: .env (TESTNET=false)
+- Kapital: 50€ USDT Mainnet
+- Risk: 2% pro Trade, Emergency Stop bei -15%
+
+ERWARTUNG:
+- 10-25 Trades in 8h
+- Performance: +2-8€ 
+- Auto-Stop um 03:05
+
+Falls Bot gestoppt: echo [MINUTES] | python enhanced_live_bot.py
+Falls Dashboard down: streamlit run monitoring/enhanced_dashboard.py --server.port 8507
+
+Bitte sofort Status prüfen und alles wiederherstellen was nötig ist!

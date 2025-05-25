@@ -33,7 +33,7 @@ class EnhancedLiveTradingBot:
         # Deine Bybit API Konfiguration
         self.api_key = os.getenv('BYBIT_API_KEY')
         self.api_secret = os.getenv('BYBIT_API_SECRET')
-        self.testnet = True
+        self.testnet = os.getenv('TESTNET', 'false').lower() == 'true'
         
         # Trading Status
         self.running = False
@@ -51,9 +51,10 @@ class EnhancedLiveTradingBot:
         logger.info(f"Testnet Mode: {self.testnet}")
     
     def get_bybit_price(self):
-        """Holt aktuellen BTC Preis von Bybit Testnet"""
+        """Holt aktuellen BTC Preis von Bybit"""
         try:
-            url = "https://api-testnet.bybit.com/v5/market/tickers"
+            base_url = "https://api.bybit.com" if not self.testnet else "https://api-testnet.bybit.com"
+            url = f"{base_url}/v5/market/tickers"
             params = {'category': 'spot', 'symbol': 'BTCUSDT'}
             
             response = requests.get(url, params=params, timeout=10)
