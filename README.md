@@ -31,19 +31,20 @@
 
 ## 🚀 Aktueller Status (Mai 2025)
 
-- **Version**: 2.2.0-live-mainnet
-- **API Integration**: ✅ **VOLLSTÄNDIG FUNKTIONSFÄHIG**
-- **Live Trading**: ✅ **PRODUCTION ACTIVE**
-- **Enhanced Strategy**: ✅ **LIVE DEPLOYED**
-- **Real-time Monitoring**: ✅ **AKTIV**
-- **Unicode Issues**: ✅ **KOMPLETT GELÖST**
+- **Version**: 2.2.1-advanced-dashboard-live
+- **API Integration**: ✅ **VOLLSTÄNDIG FUNKTIONSFÄHIG** - $83.38 USDT confirmed
+- **Live Trading**: ✅ **PRODUCTION ACTIVE** - Bybit Mainnet operational
+- **Enhanced Strategy**: ✅ **LIVE DEPLOYED** - Market Regime Detection aktiv
+- **Advanced Dashboard**: ✅ **OPERATIONAL** - Professional Trading Interface
+- **Real-time Monitoring**: ✅ **AKTIV** - Live Portfolio & Signal Tracking
+- **Audio Alert System**: ✅ **INTEGRIERT** - Windows Sound Feedback
 
 ### 🔧 Kürzlich Gelöste Probleme
-- ✅ **Unicode Console Encoding** - Alle Emoji-Probleme behoben
-- ✅ **Auto-Start System** - Keine manuelle Eingabe erforderlich
-- ✅ **Dashboard API Connection** - Live-Daten funktionieren perfekt
-- ✅ **MAINNET Configuration** - Echte Orders werden platziert
-- ✅ **Real-time Order Book** - Live Bid/Ask Spreads
+- ✅ **Advanced Dashboard API Fix** - LiveBybitAPI Compatibility behoben
+- ✅ **Live Portfolio Integration** - $83.38 USDT Balance korrekt angezeigt
+- ✅ **Professional Charts** - Candlestick Charts mit echten BTC Preisen
+- ✅ **Order Book Display** - Live Bid/Ask Spreads funktional
+- ✅ **Bot Control Integration** - Trading Controls fully operational
 
 ---
 
@@ -67,14 +68,16 @@ cp .env.example .env
 
 ### 3. Live Trading Starten
 ```bash
-# Live Trading Bot (Auto-Start, 8 Stunden)
-python live_trading_bot_clean.py
+# ADVANCED Dashboard (Professional Interface)
+START_ADVANCED_DASHBOARD.bat
+# URL: http://localhost:8501 (Advanced Trading Interface)
 
-# Real-time Dashboard (parallel)
-streamlit run monitoring/advanced_live_dashboard.py --server.port 8501
+# Live Trading Bot mit Audio Alerts
+START_COMPLETE_SYSTEM_WITH_AUDIO.bat
 
-# Oder Batch-Script
-START_LIVE_TRADING_MAINNET.bat
+# Oder einzeln:
+python live_trading_bot_clean.py  # Trading Bot
+streamlit run monitoring/advanced_live_dashboard.py --server.port 8501  # Dashboard
 ```
 
 ---
@@ -136,9 +139,76 @@ SESSION_DURATION=480min  # 8 Stunden Auto-Trading
 - **Session Duration**: 8 Stunden (480 Minuten)
 - **Current Status**: ✅ **AKTIV UND TRADING**
 
+## 📊 Advanced Live Trading Dashboard
+
+### 🚀 **PROFESSIONAL TRADING INTERFACE** 
+Das Advanced Dashboard bietet eine vollständige Trading-Platform-Erfahrung:
+
+#### **📈 Live Charts & Market Data:**
+- ✅ **Professional Candlestick Charts** mit EMA-Lines & Volume
+- ✅ **Live Order Book** Visualization (Real-time Bids/Asks)
+- ✅ **Real-time BTC Price** mit 24h Change & Spreads
+- ✅ **Technical Indicators** (EMA20, EMA50, Volume Analysis)
+- ✅ **Market Depth** Charts & Liquidity Analysis
+
+#### **🎮 Trading Controls:**
+- ✅ **Bot Control Interface** (Start/Stop/Pause Trading)
+- ✅ **Emergency Stop Button** (Sofortiger Handel-Stopp)
+- ✅ **Manual Trading** BUY/SELL Buttons für Override
+- ✅ **Risk Management** Slider (Risk per Trade, Max Drawdown)
+- ✅ **Strategy Parameter** Live-Adjustment
+
+#### **💰 Live Portfolio Monitoring:**
+- ✅ **Echte $83.38 USDT** Balance Integration (Mainnet)
+- ✅ **Live P&L Tracking** mit Prozent-Änderungen
+- ✅ **Position Monitoring** (LONG/SHORT/None mit Exposure)
+- ✅ **Risk Level Gauges** mit visuellen Warnsystemen
+- ✅ **Balance Breakdown** (USDT, BTC, andere Coins)
+
+#### **⚡ Live Signal System:**
+- ✅ **Signal Detection** (Strong/Medium/Weak/None)
+- ✅ **4-Filter Status Breakdown** (Volume, Levels, Pattern, Order Flow)
+- ✅ **Signal Quality Indicator** mit Confidence Levels
+- ✅ **Market Regime Detection** (Bull/Bear/Sideways) Live Display
+
+### Dashboard Zugriff
+```bash
+# Advanced Dashboard starten
+START_ADVANCED_DASHBOARD.bat
+
+# Oder manuell:
+streamlit run monitoring/advanced_live_dashboard.py --server.port 8501
+# Browser: http://localhost:8501
+```
+
 ---
 
-## 📈 Real-time Dashboard
+## 🎵 Audio Alert System
+
+### 🔊 **WINDOWS SOUND INTEGRATION**
+Der Bot verfügt über ein vollständig integriertes Audio-Alert System:
+
+#### **Trading Event Sounds:**
+- 🚀 **Bot Startup**: Aufsteigende Startup-Melodie
+- 🎯 **BUY Signal**: 2x hohe Töne (1000Hz + 1200Hz) + Celebration
+- 🎯 **SELL Signal**: 2x tiefe Töne (600Hz + 400Hz) + Alert Sound
+- ✅ **Trade Success**: Windows Success Sound + Profit Celebration
+- ❌ **Trade Failed**: Windows Error Sound + Loss Alert
+- 😐 **No Signal**: Kurzer tiefer Ton (200Hz, 50ms)
+- 🛑 **Bot Shutdown**: Absteigende Shutdown-Melodie
+
+#### **Audio-Enhanced Trading:**
+```bash
+# Bot starten mit Audio Alerts
+START_COMPLETE_SYSTEM_WITH_AUDIO.bat
+
+# Audio System testen
+python test_audio_alerts.py
+```
+
+**Alle Trading-Events werden durch entsprechende Sounds begleitet für optimale Überwachung!**
+
+---
 
 ### Dashboard Features ✅ LIVE
 - **Live BTC Price**: $107,418.00 (+1.26%)
