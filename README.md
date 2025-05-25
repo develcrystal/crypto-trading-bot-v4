@@ -6,15 +6,16 @@
 ![Bybit](https://img.shields.io/badge/Exchange-Bybit%20V5-orange.svg)
 ![Clean Code](https://img.shields.io/badge/Code-Production%20Clean-success.svg)
 
-## 🎉 PRODUCTION READY - Dezember 2025
+## 🎉 PRODUCTION READY - Mai 2025
 
-**✅ MAINNET DEPLOYMENT READY!** - Enhanced Smart Money Bot bereit für Echtgeld-Trading!
+**✅ MAINNET DEPLOYMENT READY!** - Enhanced Smart Money Bot mit Advanced Dashboard bereit für Echtgeld-Trading!
 
 - 🔧 **Bybit V5 API Integration**: ✅ **100% FUNKTIONSFÄHIG & VALIDIERT**
 - 🚀 **Enhanced Smart Money Strategy**: ✅ **PRODUCTION DEPLOYED**
 - 💰 **50€ Live Trading Setup**: ✅ **BEREIT FÜR MAINNET**
-- 📊 **Real-time Dashboard**: ✅ **BYBIT FOCUSED MONITORING AKTIV**
+- 📊 **Advanced Live Dashboard**: ✅ **PROFESSIONAL GRADE UI/UX**
 - 🧠 **Market Regime Detection**: ✅ **ADAPTIVE STRATEGY DEPLOYED**
+- 🎮 **Trading Controls**: ✅ **MANUAL ORDERS & EMERGENCY STOP**
 - 🧹 **Clean Repository**: ✅ **PRODUCTION-READY CODEBASE**
 
 ---
@@ -188,8 +189,13 @@ crypto-bot_V2/
 ├── exchange/                        # Bybit V5 API Integration
 │   └── bybit_api.py                # Production API Handler
 ├── 
-├── monitoring/                      # Real-time Dashboards
-│   └── bybit_focused_dashboard.py  # Live Trading Monitoring
+├── monitoring/                      # Professional Dashboards
+│   ├── advanced_live_dashboard_final.py  # 🚀 ADVANCED DASHBOARD
+│   ├── launch_advanced_dashboard.py      # Professional Launcher
+│   ├── LAUNCH_ADVANCED_DASHBOARD.bat     # One-Click Windows Launcher
+│   ├── components/                       # Dashboard Components
+│   ├── static/                          # Professional CSS Styling
+│   └── bybit_focused_dashboard.py        # Legacy Focused Dashboard
 ├── 
 ├── config/                          # Optimierte Konfiguration
 │   └── config.py                   # Filter & Parameter Settings
@@ -235,24 +241,89 @@ crypto-bot_V2/
 
 ---
 
-## 📈 Live Monitoring Dashboard
+## 🚀 Advanced Live Trading Dashboard
 
-### **Real-time Features**
-- 📊 **Live Portfolio Tracking**: Echte Balance & Unrealized P&L
-- 🧠 **Market Regime Display**: Bull/Bear/Sideways mit Confidence Score
-- ⚡ **Trading Signals**: Real-time BUY/SELL Signal Generation
-- 📈 **Performance Metrics**: Win Rate, Drawdown, Profit Factor
-- 🔍 **Filter Status**: Live Monitoring aller Strategy-Filter
-- 🎯 **Position Management**: Entry, Stop-Loss, Take-Profit Tracking
+### **🔥 PROFESSIONAL GRADE DASHBOARD - NEU!**
+Vollständig neues **Advanced Live Trading Dashboard** - Professional wie Bloomberg Terminal!
 
-### **Dashboard Zugriff**
+#### **🎆 BRANDNEUE FEATURES:**
+- 🔴 **Live Market Data**: Real-time BTC/USDT Preise, Order Book, Market Depth
+- 📈 **Professional Charts**: Candlestick Charts mit EMA, RSI, MACD, Volume
+- 💼 **Portfolio Monitoring**: Live Balance, P&L, Risk Metrics, Performance Analytics
+- 🎮 **Advanced Trading Controls**: Manual Orders, Bot Control, Emergency Stop
+- 🧠 **Market Regime Detection**: Bull/Bear/Sideways mit Adaptive Parameters
+- ⚡ **Live Trading Signals**: Enhanced Smart Money Strategy Status
+- 🛡️ **Risk Management Dashboard**: Comprehensive Risk Monitoring
+- 🎨 **Professional UI/UX**: Dark Theme, Modern Design, Interactive Elements
+
+#### **🚀 ADVANCED DASHBOARD STARTEN:**
 ```bash
-# Real-time Dashboard starten
+# 🚀 Advanced Dashboard (One-Click Launcher)
+cd monitoring/
+LAUNCH_ADVANCED_DASHBOARD.bat
+
+# Oder Python Launcher
+python launch_advanced_dashboard.py
+
+# Browser öffnet automatisch: http://localhost:8501
+# 🎯 Professional Grade Interface
+# 💰 Ready for 50€ Mainnet Trading
+```
+
+#### **📉 DASHBOARD FEATURES:**
+
+##### 💰 **Live Market Data Section**
+- **Real-time BTC/USDT Price** mit 24h Change und Volatility
+- **Bid/Ask Spreads** mit Live Order Book (Top 20 Levels)
+- **Market Depth Visualization** mit Interactive Charts
+- **24h Statistics**: High, Low, Volume, Price Position
+
+##### 📈 **Professional Trading Charts**
+- **Multi-Timeframe Charts**: 1m, 5m, 15m, 30m, 1h, 4h
+- **Technical Indicators**: EMA (9,21,50), RSI, MACD, Bollinger Bands
+- **Support/Resistance Levels** automatisch erkannt
+- **Volume Analysis** mit SMA und Spike Detection
+
+##### 💼 **Advanced Portfolio Monitor**
+- **Live USDT/BTC Balance** von Bybit API
+- **Real-time P&L Tracking** (Realized & Unrealized)
+- **Portfolio Allocation Chart** mit Interactive Pie Chart
+- **Performance Metrics**: ROI, Sharpe Ratio, Win Rate, Drawdown
+
+##### 🧠 **Market Regime Detection**
+- **Automatic Bull/Bear/Sideways Recognition** mit 85% Accuracy
+- **Confidence Level Gauge** mit Visual Indicators
+- **Adaptive Strategy Parameters** Display
+- **Regime Timeline** mit Historical Changes
+
+##### ⚡ **Live Trading Signals**
+- **Enhanced Smart Money Strategy Status**
+- **Filter Breakdown**: Volume, Key Levels, Patterns, Order Flow
+- **Signal Strength Meter** (1-5 Stars)
+- **Next Analysis Countdown** with Real-time Updates
+
+##### 🎮 **Advanced Trading Controls**
+- **🤖 Bot Control**: Start/Stop Enhanced Smart Money Bot
+- **⚡ Manual Trading**: Quick BUY/SELL Orders ($5, $10, $15, Custom)
+- **⚙️ Risk Settings**: Live Risk Parameter Adjustment
+- **🚨 Emergency Controls**: EMERGENCY STOP, Close All Positions
+
+##### 🎨 **Professional Design**
+- **🌙 Dark Theme** optimiert für Trading
+- **📱 Responsive Layout** für Desktop und Tablet
+- **⚡ Real-time Updates** alle 30 Sekunden
+- **🎯 Interactive Elements** mit Hover Effects
+- **📉 Professional Charts** wie TradingView
+- **🔴 Live Indicators** mit Pulsing Animations
+
+### **🎯 LEGACY DASHBOARD (Weiterhin verfügbar)**
+```bash
+# Einfacher Bybit Focused Dashboard
 streamlit run monitoring/bybit_focused_dashboard.py --server.port 8505
 
-# Browser öffnet automatisch: http://localhost:8505
+# Für schnelle Übersicht ohne advanced Features
 # Auto-Refresh alle 30 Sekunden
-# Mobile-responsive Design
+# Fokus auf Live Trading Essentials
 ```
 
 ---
