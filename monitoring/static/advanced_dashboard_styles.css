@@ -1,0 +1,302 @@
+/* 🚀 ADVANCED LIVE TRADING DASHBOARD - PROFESSIONAL STYLES */
+
+/* Import professional fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* Global styling */
+.stApp {
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+/* Main container */
+.main-container {
+    background: white;
+    border-radius: 15px;
+    padding: 20px;
+    margin: 10px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+}
+
+/* Header styling */
+.dashboard-header {
+    background: linear-gradient(90deg, #1f2937 0%, #374151 100%);
+    padding: 25px;
+    border-radius: 15px;
+    margin-bottom: 25px;
+    color: white;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.dashboard-title {
+    font-size: 2.5em;
+    font-weight: 700;
+    margin: 0;
+    background: linear-gradient(45deg, #ffd700, #ffed4e);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.dashboard-subtitle {
+    font-size: 1.2em;
+    font-weight: 400;
+    margin: 10px 0 0 0;
+    opacity: 0.9;
+}
+
+/* Live indicator */
+.live-indicator { 
+    animation: pulse 2s infinite;
+    color: #10b981;
+    font-weight: bold;
+    font-size: 18px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.live-dot {
+    width: 12px;
+    height: 12px;
+    background: #10b981;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.7; transform: scale(1.1); }
+    100% { opacity: 1; transform: scale(1); }
+}
+
+/* Status indicators */
+.status-indicator {
+    padding: 8px 16px;
+    border-radius: 25px;
+    font-weight: 600;
+    font-size: 0.9em;
+    display: inline-block;
+    margin: 5px;
+}
+
+.status-active { background: #10b981; color: white; }
+.status-paused { background: #f59e0b; color: white; }
+.status-error { background: #ef4444; color: white; }
+.status-emergency { background: #dc2626; color: white; animation: pulse 1s infinite; }
+
+/* Widget containers */
+.widget-container {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 20px;
+    margin: 10px 0;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+}
+
+.widget-container:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+}
+
+.widget-header {
+    font-size: 1.3em;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Price display */
+.price-display {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 30px;
+    border-radius: 15px;
+    text-align: center;
+    box-shadow: 0 15px 35px rgba(102, 126, 234, 0.3);
+    margin-bottom: 20px;
+}
+
+.price-main {
+    font-size: 3.5em;
+    font-weight: 700;
+    margin: 0;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+}
+
+.price-change {
+    font-size: 1.5em;
+    font-weight: 600;
+    margin: 10px 0;
+}
+
+.price-meta {
+    font-size: 0.9em;
+    opacity: 0.9;
+    margin: 5px 0;
+}
+
+/* Order book styling */
+.order-book {
+    font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+    font-size: 12px;
+    background: #f8fafc;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+.order-book-header {
+    display: flex;
+    justify-content: space-between;
+    font-weight: bold;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 8px;
+    margin-bottom: 10px;
+    color: #374151;
+}
+
+.order-book-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 3px 0;
+    border-bottom: 1px solid #f1f5f9;
+    transition: background-color 0.2s ease;
+}
+
+.order-book-row:hover {
+    background-color: rgba(59, 130, 246, 0.05);
+}
+
+.buy-price { 
+    color: #10b981; 
+    font-weight: bold; 
+}
+
+.sell-price { 
+    color: #ef4444; 
+    font-weight: bold; 
+}
+
+/* Trading controls styling */
+.trading-control-panel {
+    background: #1f2937;
+    color: white;
+    border-radius: 12px;
+    padding: 20px;
+    margin: 10px 0;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.control-header {
+    font-size: 1.2em;
+    font-weight: 600;
+    margin: 0 0 15px 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Button styling */
+.stButton > button {
+    font-weight: 600;
+    border-radius: 8px;
+    border: none;
+    padding: 8px 16px;
+    transition: all 0.3s ease;
+}
+
+.stButton > button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+/* Emergency button */
+.emergency-button {
+    background: linear-gradient(45deg, #dc2626, #b91c1c) !important;
+    color: white !important;
+    font-weight: bold !important;
+    border: none !important;
+    padding: 12px 24px !important;
+    border-radius: 8px !important;
+    animation: pulse 2s infinite;
+    font-size: 1.1em !important;
+}
+
+/* Success button */
+.success-button {
+    background: linear-gradient(45deg, #059669, #047857) !important;
+    color: white !important;
+    font-weight: bold !important;
+}
+
+/* Alert styling */
+.alert-success {
+    background: linear-gradient(45deg, #10b981, #059669);
+    color: white;
+    padding: 15px 20px;
+    border-radius: 10px;
+    margin: 10px 0;
+    font-weight: 500;
+}
+
+.alert-warning {
+    background: linear-gradient(45deg, #f59e0b, #d97706);
+    color: white;
+    padding: 15px 20px;
+    border-radius: 10px;
+    margin: 10px 0;
+    font-weight: 500;
+}
+
+.alert-error {
+    background: linear-gradient(45deg, #ef4444, #dc2626);
+    color: white;
+    padding: 15px 20px;
+    border-radius: 10px;
+    margin: 10px 0;
+    font-weight: 500;
+}
+
+/* Footer styling */
+.dashboard-footer {
+    text-align: center;
+    padding: 30px 20px;
+    background: #f8fafc;
+    border-radius: 15px;
+    margin-top: 30px;
+    color: #6b7280;
+    font-weight: 500;
+    border: 1px solid #e2e8f0;
+}
+
+.footer-highlight {
+    color: #3b82f6;
+    font-weight: 700;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .dashboard-title {
+        font-size: 2em;
+    }
+    
+    .price-main {
+        font-size: 2.5em;
+    }
+    
+    .widget-container {
+        padding: 15px;
+        margin: 8px 0;
+    }
+    
+    .trading-control-panel {
+        padding: 15px;
+    }
+}
