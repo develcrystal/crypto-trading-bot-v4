@@ -9,7 +9,9 @@ import hashlib
 import hmac
 import time
 import os
+from datetime import datetime
 from dotenv import load_dotenv
+import pandas as pd
 
 load_dotenv()
 
@@ -64,22 +66,32 @@ class LiveBybitAPI:
                 response = requests.post(url, headers=headers, data=payload, timeout=10)
             
             if response.status_code == 200:
-                return response.json()
+                return {'success': True, 'data': response.json()}
             else:
-                print(f"API Error: {response.status_code} - {response.text}")
-                return None
+                error_msg = f"API Error: {response.status_code} - {response.text}"
+                print(error_msg)
+                return {'success': False, 'error': error_msg}
                 
+        except requests.exceptions.Timeout:
+            error_msg = "Request Timeout: The API request took too long to respond."
+            print(error_msg)
+            return {'success': False, 'error': error_msg}
+        except requests.exceptions.ConnectionError:
+            error_msg = "Connection Error: Unable to connect to the Bybit API. Check your internet connection or Bybit server status."
+            print(error_msg)
+            return {'success': False, 'error': error_msg}
         except Exception as e:
-            print(f"Request Error: {e}")
-            return None
+            error_msg = f"Request Error: {e}"
+            print(error_msg)
+            return {'success': False, 'error': error_msg}
     
-    def get_account_balance(self):
+    def get_wallet_balance(self):
         """Holt echte Account Balance"""
         try:
             result = self.make_request("GET", "/v5/account/wallet-balance", "accountType=UNIFIED")
             
-            if result and result.get('retCode') == 0:
-                account = result['result']['list'][0]
+            if result['success'] and result['data'].get('retCode') == 0:
+                account = result['data']['result']['list'][0]
                 coins = account['coin']
                 
                 balances = {}
@@ -134,12 +146,99 @@ class LiveBybitAPI:
         except Exception as e:
             return {'success': False, 'error': str(e)}
     
+    def get_live_ticker(self, symbol='BTCUSDT'):
+        """Get live ticker data with bid/ask"""
+        try:
+            url = f"{self.base_url}/v5/market/tickers"
+            params = {'category': 'spot', 'symbol': symbol}
+            
+            response = requests.get(url, params=params, timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get('retCode') == 0 and 'result' in data:
+                    ticker_list = data['result']['list']
+                    if ticker_list:
+                        ticker = ticker_list[0]
+                        return {
+                            'success': True,
+                            'price': float(ticker.get('lastPrice', 0)),
+                            'bid': float(ticker.get('bid1Price', 0)),
+                            'ask': float(ticker.get('ask1Price', 0)),
+                            'volume_24h': float(ticker.get('volume24h', 0)),
+                            'change_24h': float(ticker.get('price24hPcnt', 0)) * 100,
+                            'high_24h': float(ticker.get('highPrice24h', 0)),
+                            'low_24h': float(ticker.get('lowPrice24h', 0)),
+                            'timestamp': datetime.now()
+                        }
+            
+            return {'success': False, 'error': f'HTTP {response.status_code}'}
+            
+        except Exception as e:
+            return {'success': False, 'error': str(e)}
+
+    def get_order_book(self, symbol='BTCUSDT', limit=10):
+        """Get live order book data"""
+        try:
+            url = f"{self.base_url}/v5/market/orderbook"
+            params = {'category': 'spot', 'symbol': symbol, 'limit': limit}
+            
+            response = requests.get(url, params=params, timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get('retCode') == 0 and 'result' in data:
+                    book = data['result']
+                    return {
+                        'success': True,
+                        'bids': [[float(x[0]), float(x[1])] for x in book.get('b', [])],
+                        'asks': [[float(x[0]), float(x[1])] for x in book.get('a', [])],
+                        'timestamp': datetime.now()
+                    }
+            
+            return {'success': False, 'error': f'HTTP {response.status_code}'}
+            
+        except Exception as e:
+            return {'success': False, 'error': str(e)}
+
+    def get_kline_data(self, symbol='BTCUSDT', interval='5', limit=100):
+        """Get candlestick data for charts"""
+        try:
+            params = {
+                'category': 'spot',
+                'symbol': symbol,
+                'interval': interval,
+                'limit': limit
+            }
+            
+            result = self.make_request("GET", "/v5/market/kline", payload=f"category=spot&symbol={symbol}&interval={interval}&limit={limit}")
+            
+            if result['success'] and result['data'].get('retCode') == 0:
+                klines = result['data']['result']['list']
+                df = pd.DataFrame(klines, columns=[
+                    'timestamp', 'open', 'high', 'low', 'close', 'volume', 'turnover'
+                ])
+                df['timestamp'] = pd.to_datetime(df['timestamp'].astype(int), unit='ms')
+                for col in ['open', 'high', 'low', 'close', 'volume']:
+                    df[col] = df[col].astype(float)
+                df = df.sort_values('timestamp').reset_index(drop=True)
+                return {'success': True, 'data': df}
+            
+            return {'success': False, 'error': result.get('error', 'Failed to fetch kline data')}
+            
+        except Exception as e:
+            return {'success': False, 'error': str(e)}
+
     def get_dashboard_data(self):
         """Kombinierte Daten für Dashboard"""
-        balance_data = self.get_account_balance()
+        balance_data = self.get_wallet_balance()
         price_data = self.get_btc_price()
+        live_ticker_data = self.get_live_ticker()
+        order_book_data = self.get_order_book()
         
-        if balance_data['success'] and price_data['success']:
+        kline_data = self.get_kline_data()
+        
+        if balance_data['success'] and price_data['success'] and live_ticker_data['success'] and order_book_data['success'] and kline_data['success']:
             return {
                 'portfolio_value': balance_data['total_usdt_value'],
                 'balances': balance_data['balances'],
@@ -148,16 +247,28 @@ class LiveBybitAPI:
                 'btc_high_24h': price_data['high_24h'],
                 'btc_low_24h': price_data['low_24h'],
                 'btc_volume_24h': price_data['volume_24h'],
+                'bid': live_ticker_data['bid'],
+                'ask': live_ticker_data['ask'],
+                'order_book_bids': order_book_data['bids'],
+                'order_book_asks': order_book_data['asks'],
+                'kline_data': kline_data['data'],
                 'api_status': 'CONNECTED',
                 'account_type': 'TESTNET' if self.testnet else 'MAINNET',
                 'success': True
             }
         else:
+            error_details = {
+                'balance_error': balance_data.get('error', 'N/A') if not balance_data['success'] else 'None',
+                'price_error': price_data.get('error', 'N/A') if not price_data['success'] else 'None',
+                'live_ticker_error': live_ticker_data.get('error', 'N/A') if not live_ticker_data['success'] else 'None',
+                'order_book_error': order_book_data.get('error', 'N/A') if not order_book_data['success'] else 'None',
+                'kline_error': kline_data.get('error', 'N/A') if not kline_data['success'] else 'None'
+            }
+            print(f"Dashboard Data Fetch Error Details: {error_details}")
             return {
                 'success': False,
                 'api_status': 'ERROR',
-                'balance_error': balance_data.get('error', ''),
-                'price_error': price_data.get('error', '')
+                'error': f"Failed to fetch all dashboard data. Details: {error_details}"
             }
 
 # Test function
@@ -185,10 +296,29 @@ def test_api():
                 print(f"   {coin}: {amount:.2f}")
             else:
                 print(f"   {coin}: {amount:.6f}")
+        
+        print("\nLive Ticker Data:")
+        print(f"  Bid: {result['bid']:.2f}")
+        print(f"  Ask: {result['ask']:.2f}")
+        
+        print("\nOrder Book Bids (first 5):")
+        for bid in result['order_book_bids'][:5]:
+            print(f"  Price: {bid[0]:.2f}, Size: {bid[1]:.4f}")
+            
+        print("\nOrder Book Asks (first 5):")
+        for ask in result['order_book_asks'][:5]:
+            print(f"  Price: {ask[0]:.2f}, Size: {ask[1]:.4f}")
+            
+        print("\nKline Data (last 5 rows):")
+        print(result['kline_data'].tail())
+        
     else:
         print("\nAPI Connection Failed!")
         print(f"Balance Error: {result.get('balance_error', 'N/A')}")
         print(f"Price Error: {result.get('price_error', 'N/A')}")
+        print(f"Live Ticker Error: {result.get('live_ticker_error', 'N/A')}")
+        print(f"Order Book Error: {result.get('order_book_error', 'N/A')}")
+        print(f"Kline Error: {result.get('kline_error', 'N/A')}")
 
 if __name__ == "__main__":
     test_api()

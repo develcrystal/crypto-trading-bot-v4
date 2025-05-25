@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-🚀 ADVANCED LIVE TRADING DASHBOARD - MIT ECHTEN $83.38 USDT!
+🚀 ADVANCED LIVE TRADING DASHBOARD - MIT ECHTEN $50.00 USDT!
 Professional Real-time Dashboard für Enhanced Smart Money Bot
 Version: 2.1 - LIVE MAINNET mit ECHTEN DATEN!
 """
@@ -18,11 +18,18 @@ import hmac
 import hashlib
 from datetime import datetime, timedelta
 import os
+import sys # Import sys
 from dotenv import load_dotenv
 import sqlite3
 from pathlib import Path
 
-# Import LIVE API for REAL $83.38 USDT Balance
+# Add root directory to Python path for module imports
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from ui.advanced_chart import SmartMoneyChart
+from core.api_client import BybitAPIClient
+
+# Import LIVE API for REAL $50.00 USDT Balance
 from live_bybit_api import LiveBybitAPI
 
 # Load environment variables
@@ -30,7 +37,7 @@ load_dotenv()
 
 # Page configuration
 st.set_page_config(
-    page_title="🚀 Advanced Live Trading Dashboard - MAINNET $83.38",
+    page_title="🚀 Advanced Live Trading Dashboard - MAINNET $50.00",
     page_icon="💰",
     layout="wide",
     initial_sidebar_state="collapsed"
@@ -130,145 +137,8 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-class AdvancedBybitAPI:
-    """Enhanced Bybit API with Order Book and Live Data"""
-    
-    def __init__(self):
-        self.api_key = os.getenv('BYBIT_API_KEY')
-        self.api_secret = os.getenv('BYBIT_API_SECRET')
-        self.testnet = os.getenv('TESTNET', 'true').lower() == 'true'
-        
-        if self.testnet:
-            self.base_url = "https://api-testnet.bybit.com"
-        else:
-            self.base_url = "https://api.bybit.com"
-    
-    def _generate_signature(self, params_str, timestamp):
-        """Generate HMAC SHA256 signature"""
-        param_str = f"{timestamp}{self.api_key}{5000}{params_str}"
-        return hmac.new(
-            self.api_secret.encode('utf-8'),
-            param_str.encode('utf-8'),
-            hashlib.sha256
-        ).hexdigest()
-    
-    def get_account_balance(self):
-        """Get real account balance"""
-        try:
-            timestamp = str(int(time.time() * 1000))
-            params = ""
-            signature = self._generate_signature(params, timestamp)
-            
-            headers = {
-                'X-BAPI-API-KEY': self.api_key,
-                'X-BAPI-SIGN': signature,
-                'X-BAPI-SIGN-TYPE': '2',
-                'X-BAPI-TIMESTAMP': timestamp,
-                'X-BAPI-RECV-WINDOW': '5000'
-            }
-            
-            url = f"{self.base_url}/v5/account/wallet-balance"
-            params = {'accountType': 'UNIFIED'}
-            
-            response = requests.get(url, headers=headers, params=params, timeout=10)
-            
-            if response.status_code == 200:
-                data = response.json()
-                if data.get('retCode') == 0:
-                    return {'success': True, 'data': data['result']}
-            
-            return {'success': False, 'error': f'HTTP {response.status_code}'}
-            
-        except Exception as e:
-            return {'success': False, 'error': str(e)}
-    
-    def get_live_ticker(self, symbol='BTCUSDT'):
-        """Get live ticker data with bid/ask"""
-        try:
-            url = f"{self.base_url}/v5/market/tickers"
-            params = {'category': 'spot', 'symbol': symbol}
-            
-            response = requests.get(url, params=params, timeout=10)
-            
-            if response.status_code == 200:
-                data = response.json()
-                if data.get('retCode') == 0 and 'result' in data:
-                    ticker_list = data['result']['list']
-                    if ticker_list:
-                        ticker = ticker_list[0]
-                        return {
-                            'success': True,
-                            'price': float(ticker.get('lastPrice', 0)),
-                            'bid': float(ticker.get('bid1Price', 0)),
-                            'ask': float(ticker.get('ask1Price', 0)),
-                            'volume_24h': float(ticker.get('volume24h', 0)),
-                            'change_24h': float(ticker.get('price24hPcnt', 0)) * 100,
-                            'high_24h': float(ticker.get('highPrice24h', 0)),
-                            'low_24h': float(ticker.get('lowPrice24h', 0)),
-                            'timestamp': datetime.now()
-                        }
-            
-            return {'success': False, 'error': f'HTTP {response.status_code}'}
-            
-        except Exception as e:
-            return {'success': False, 'error': str(e)}
-    
-    def get_order_book(self, symbol='BTCUSDT', limit=10):
-        """Get live order book data"""
-        try:
-            url = f"{self.base_url}/v5/market/orderbook"
-            params = {'category': 'spot', 'symbol': symbol, 'limit': limit}
-            
-            response = requests.get(url, params=params, timeout=10)
-            
-            if response.status_code == 200:
-                data = response.json()
-                if data.get('retCode') == 0 and 'result' in data:
-                    book = data['result']
-                    return {
-                        'success': True,
-                        'bids': [[float(x[0]), float(x[1])] for x in book.get('b', [])],
-                        'asks': [[float(x[0]), float(x[1])] for x in book.get('a', [])],
-                        'timestamp': datetime.now()
-                    }
-            
-            return {'success': False, 'error': f'HTTP {response.status_code}'}
-            
-        except Exception as e:
-            return {'success': False, 'error': str(e)}
-    
-    def get_kline_data(self, symbol='BTCUSDT', interval='5', limit=100):
-        """Get candlestick data for charts"""
-        try:
-            url = f"{self.base_url}/v5/market/kline"
-            params = {
-                'category': 'spot',
-                'symbol': symbol,
-                'interval': interval,
-                'limit': limit
-            }
-            
-            response = requests.get(url, params=params, timeout=10)
-            
-            if response.status_code == 200:
-                data = response.json()
-                if data.get('retCode') == 0 and 'result' in data:
-                    klines = data['result']['list']
-                    df = pd.DataFrame(klines, columns=[
-                        'timestamp', 'open', 'high', 'low', 'close', 'volume', 'turnover'
-                    ])
-                    df['timestamp'] = pd.to_datetime(df['timestamp'].astype(int), unit='ms')
-                    for col in ['open', 'high', 'low', 'close', 'volume']:
-                        df[col] = df[col].astype(float)
-                    df = df.sort_values('timestamp').reset_index(drop=True)
-                    return {'success': True, 'data': df}
-            
-            return {'success': False, 'error': f'HTTP {response.status_code}'}
-            
-        except Exception as e:
-            return {'success': False, 'error': str(e)}
 
-# Initialize API with REAL $83.38 USDT Balance
+# Initialize API with REAL $50.00 USDT Balance
 @st.cache_resource
 def get_api_client():
     return LiveBybitAPI()
@@ -318,10 +188,11 @@ initialize_session_state()
 def refresh_all_data():
     """Refresh all dashboard data using LiveBybitAPI"""
     # Get live data using our working LiveBybitAPI
-    live_api = LiveBybitAPI()
+    api_client = LiveBybitAPI()
     
     # Get dashboard data (includes price, balance, etc.)
-    dashboard_data = live_api.get_dashboard_data()
+    # Get all dashboard data from LiveBybitAPI
+    dashboard_data = api_client.get_dashboard_data()
     
     if dashboard_data['success']:
         # Store live ticker data
@@ -332,9 +203,9 @@ def refresh_all_data():
             'high_24h': dashboard_data['btc_high_24h'],
             'low_24h': dashboard_data['btc_low_24h'],
             'volume_24h': dashboard_data['btc_volume_24h'],
-            'bid': dashboard_data['btc_price'] - 10,  # Estimate
-            'ask': dashboard_data['btc_price'] + 10,  # Estimate
-            'timestamp': datetime.now()
+            'bid': dashboard_data['bid'],
+            'ask': dashboard_data['ask'],
+            'timestamp': datetime.now() # Use current time for dashboard display
         }
         
         # Store account balance
@@ -344,67 +215,38 @@ def refresh_all_data():
             'balances': dashboard_data['balances']
         }
         
-        # Simulate order book (in production, implement get_order_book in LiveBybitAPI)
+        # Store order book
         st.session_state.order_book = {
             'success': True,
-            'bids': [[dashboard_data['btc_price'] - i*10, 0.001 + i*0.0001] for i in range(1, 11)],
-            'asks': [[dashboard_data['btc_price'] + i*10, 0.001 + i*0.0001] for i in range(1, 11)],
-            'timestamp': datetime.now()
+            'bids': dashboard_data['order_book_bids'],
+            'asks': dashboard_data['order_book_asks'],
+            'timestamp': datetime.now() # Use current time for dashboard display
         }
         
-        # Simulate chart data (basic implementation)
-        st.session_state.chart_data = {
-            'success': True,
-            'data': generate_sample_chart_data(dashboard_data['btc_price'])
-        }
-    
+        # Load chart data using SmartMoneyChart
+        # Load chart data using SmartMoneyChart
+        chart_instance = SmartMoneyChart(api_client=api_client, symbol="BTCUSDT", timeframe="5")
+        if chart_instance.load_data():
+            st.session_state.chart_data = {
+                'success': True,
+                'data': chart_instance.data
+            }
+        else:
+            st.session_state.chart_data = {'success': False, 'error': 'Failed to load chart data'}
     else:
         # Set error states
-        error_msg = dashboard_data.get('error', 'Unknown API error')
+        error_msg = dashboard_data.get('error', 'Unknown API error from get_dashboard_data')
         st.session_state.live_data = {'success': False, 'error': error_msg}
         st.session_state.account_balance = {'success': False, 'error': error_msg}
         st.session_state.order_book = {'success': False, 'error': error_msg}
         st.session_state.chart_data = {'success': False, 'error': error_msg}
-
-def generate_sample_chart_data(current_price):
-    """Generate sample chart data for demonstration"""
-    # Generate last 100 candles
-    dates = pd.date_range(end=datetime.now(), periods=100, freq='5T')
-    
-    # Simple random walk around current price
-    prices = [current_price]
-    for i in range(99):
-        change = np.random.normal(0, current_price * 0.001)  # 0.1% std dev
-        new_price = max(prices[-1] + change, current_price * 0.95)  # Don't go below 95% of current
-        new_price = min(new_price, current_price * 1.05)  # Don't go above 105% of current
-        prices.append(new_price)
-    
-    # Create OHLCV data
-    data = []
-    for i in range(len(dates)):
-        open_price = prices[i]
-        close_price = prices[i] + np.random.normal(0, current_price * 0.0005)
-        high_price = max(open_price, close_price) + abs(np.random.normal(0, current_price * 0.0003))
-        low_price = min(open_price, close_price) - abs(np.random.normal(0, current_price * 0.0003))
-        volume = np.random.uniform(0.1, 2.0)
-        
-        data.append({
-            'timestamp': dates[i],
-            'open': open_price,
-            'high': high_price,
-            'low': low_price,
-            'close': close_price,
-            'volume': volume
-        })
-    
-    return pd.DataFrame(data)
 
 def render_main_header():
     """Render professional main header with MAINNET warning"""
     st.markdown("""
     <div class="main-header">
         <h1>🚀 ADVANCED LIVE TRADING DASHBOARD 💰</h1>
-        <h2>🔴 LIVE MAINNET - ECHTE $83.38 USDT! 🔴</h2>
+        <h2>🔴 LIVE MAINNET - ECHTE $50.00 USDT! 🔴</h2>
         <p style="font-size: 1.1rem; margin-top: 10px;">
             Enhanced Smart Money Strategy • Professional Trading Interface • Real Money
         </p>
@@ -511,95 +353,94 @@ def render_order_book():
         st.error("❌ Unable to fetch order book data")
 
 def render_professional_chart():
-    """Render professional candlestick chart"""
-    st.markdown("### 📈 PROFESSIONAL TRADING CHART")
+    """Render professional trading chart using SmartMoneyChart component with all features"""
+    st.markdown("### 📈 SMART MONEY TRADING CHART")
     
     chart_data = st.session_state.chart_data
     
-    if chart_data.get('success'):
-        df = chart_data['data']
+    if chart_data.get('success') and chart_data.get('data') is not None:
+        # Create SmartMoneyChart instance
+        from ui.advanced_chart import SmartMoneyChart
+        from core.api_client import BybitAPIClient
         
-        # Create candlestick chart
-        fig = make_subplots(
-            rows=2, cols=1,
-            shared_xaxes=True,
-            vertical_spacing=0.05,
-            subplot_titles=('BTC/USDT Price', 'Volume'),
-            row_width=[0.7, 0.3]
-        )
+        # Initialize with API client
+        api_client = BybitAPIClient()
+        chart = SmartMoneyChart(api_client=api_client, symbol="BTCUSDT", timeframe="5")
         
-        # Candlestick chart
-        fig.add_trace(
-            go.Candlestick(
-                x=df['timestamp'],
-                open=df['open'],
-                high=df['high'],
-                low=df['low'],
-                close=df['close'],
-                name='BTC/USDT',
-                increasing_line_color='#26a69a',
-                decreasing_line_color='#ef5350'
-            ),
-            row=1, col=1
-        )
+        # Load data directly from session state
+        chart.data = chart_data['data']
         
-        # Add EMA lines
-        df['ema_20'] = df['close'].ewm(span=20).mean()
-        df['ema_50'] = df['close'].ewm(span=50).mean()
+        # Render the chart with all features
+        fig = chart.render_chart(height=600)
         
-        fig.add_trace(
-            go.Scatter(
-                x=df['timestamp'],
-                y=df['ema_20'],
-                mode='lines',
-                name='EMA 20',
-                line=dict(color='orange', width=1)
-            ),
-            row=1, col=1
-        )
-        
-        fig.add_trace(
-            go.Scatter(
-                x=df['timestamp'],
-                y=df['ema_50'],
-                mode='lines',
-                name='EMA 50',
-                line=dict(color='blue', width=1)
-            ),
-            row=1, col=1
-        )
-        
-        # Volume chart
-        colors = ['red' if close < open else 'green' 
-                 for close, open in zip(df['close'], df['open'])]
-        
-        fig.add_trace(
-            go.Bar(
-                x=df['timestamp'],
-                y=df['volume'],
-                name='Volume',
-                marker_color=colors,
-                opacity=0.7
-            ),
-            row=2, col=1
-        )
-        
-        # Update layout
-        fig.update_layout(
-            title="BTC/USDT Professional Chart",
-            xaxis_rangeslider_visible=False,
-            height=600,
-            showlegend=True,
-            template="plotly_dark"
-        )
-        
-        st.plotly_chart(fig, use_container_width=True)
-    
+        if fig:
+            # Update layout for better visibility
+            fig.update_layout(
+                title='BTC/USDT - Smart Money Concepts (FVG, BOS, ChoCH)',
+                xaxis_title="Time",
+                yaxis_title="Price (USDT)",
+                template="plotly_dark",
+                showlegend=True,
+                legend=dict(
+                    orientation="h",
+                    yanchor="bottom",
+                    y=1.02,
+                    xanchor="right",
+                    x=1
+                )
+            )
+            
+            # Add custom legend for Smart Money Concepts
+            fig.add_annotation(
+                x=0.01,
+                y=0.99,
+                xref="paper",
+                yref="paper",
+                text="<b>Legende:</b> ",
+                showarrow=False,
+                font=dict(size=10, color="white"),
+                align="left",
+                bordercolor="#333",
+                borderwidth=1,
+                borderpad=4,
+                bgcolor="rgba(0,0,0,0.5)"
+            )
+            
+            # Add legend items
+            legend_items = [
+                ("Fair Value Gap (FVG)", "rect", "rgba(0, 255, 0, 0.2)"),
+                ("Break of Structure (BOS)", "triangle-up", "green"),
+                ("Change of Character (ChoCH)", "circle", "orange")
+            ]
+            
+            for i, (text, symbol, color) in enumerate(legend_items, 1):
+                fig.add_annotation(
+                    x=0.01,
+                    y=0.99 - (i * 0.03),
+                    xref="paper",
+                    yref="paper",
+                    text=f"{text}",
+                    showarrow=True,
+                    arrowhead=2,
+                    arrowcolor=color,
+                    arrowsize=1,
+                    arrowwidth=2,
+                    ax=30,
+                    ay=0,
+                    font=dict(size=10, color="white"),
+                    align="left"
+                )
+            
+            st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.error("Failed to render the Smart Money Chart")
     else:
-        st.error("❌ Unable to fetch chart data")
+        st.warning("No chart data available or error loading chart data.")
+        if 'error' in chart_data:
+            st.error(f"Error: {chart_data['error']}")
 
 def render_portfolio_monitor():
-    """Render advanced portfolio monitoring with REAL $83.38 USDT"""
+    """Render advanced portfolio monitoring with REAL $50.00 USDT"""
     st.markdown("### 💼 LIVE PORTFOLIO TRACKING")
     
     # Get REAL account data
@@ -620,6 +461,14 @@ def render_portfolio_monitor():
             st.metric("💰 Portfolio", "Error", "Check API")
     
     with col2:
+        # Display Initial Investment
+        st.metric(
+            "💸 Initial Investment",
+            f"${50.0:.2f}",
+            "Planned Start Amount"
+        )
+
+    with col3: # Shifted col2 to col3
         # Calculate P&L vs 50€ start
         if live_account.get('success'):
             current_value = live_account['portfolio_value']
