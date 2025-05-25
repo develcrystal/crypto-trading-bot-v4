@@ -10,8 +10,18 @@ import hashlib
 import hmac
 import json
 import os
+import threading
+import subprocess
 from datetime import datetime
 from dotenv import load_dotenv
+
+# Windows Audio System
+try:
+    import winsound
+    AUDIO_AVAILABLE = True
+except ImportError:
+    AUDIO_AVAILABLE = False
+    print("⚠️ Audio alerts nicht verfügbar (winsound nicht installiert)")
 
 # Environment laden
 load_dotenv()
@@ -30,6 +40,126 @@ else:
 
 recv_window = str(5000)
 
+class AudioAlerts:
+    """🔊 Coole Audio-Alert System für Trading Events"""
+    
+    @staticmethod
+    def play_system_sound(sound_type):
+        """Spielt Windows System-Sounds ab"""
+        if not AUDIO_AVAILABLE:
+            return
+            
+        try:
+            if sound_type == "success":
+                # Erfolgreicher Trade
+                winsound.PlaySound("SystemAsterisk", winsound.SND_ALIAS)
+            elif sound_type == "error":
+                # Fehler oder Trade fehlgeschlagen
+                winsound.PlaySound("SystemHand", winsound.SND_ALIAS)
+            elif sound_type == "warning":
+                # Warnung oder wichtige Info
+                winsound.PlaySound("SystemExclamation", winsound.SND_ALIAS)
+            elif sound_type == "notify":
+                # Neue Analyse oder Signal
+                winsound.PlaySound("SystemDefault", winsound.SND_ALIAS)
+        except Exception as e:
+            print(f"🔇 Audio Error: {e}")
+    
+    @staticmethod
+    def play_custom_beep(frequency, duration):
+        """Spielt custom Beep-Töne ab"""
+        if not AUDIO_AVAILABLE:
+            return
+            
+        try:
+            winsound.Beep(frequency, duration)
+        except Exception as e:
+            print(f"🔇 Beep Error: {e}")
+    
+    @staticmethod
+    def celebrate_profit():
+        """🎉 Celebration Sound für Profit!"""
+        def play_celebration():
+            try:
+                # Aufsteigende Töne für Profit!
+                for freq in [400, 500, 600, 800, 1000]:
+                    winsound.Beep(freq, 150)
+                    time.sleep(0.05)
+            except:
+                pass
+        
+        if AUDIO_AVAILABLE:
+            threading.Thread(target=play_celebration, daemon=True).start()
+    
+    @staticmethod
+    def alert_loss():
+        """💥 Alert Sound für Verlust"""
+        def play_loss_alert():
+            try:
+                # Absteigende Töne für Verlust
+                for freq in [800, 600, 400, 300]:
+                    winsound.Beep(freq, 200)
+                    time.sleep(0.1)
+            except:
+                pass
+        
+        if AUDIO_AVAILABLE:
+            threading.Thread(target=play_loss_alert, daemon=True).start()
+    
+    @staticmethod
+    def signal_detected(signal_type):
+        """🎯 Signal Detection Sounds"""
+        def play_signal():
+            try:
+                if signal_type == "BUY":
+                    # Zwei schnelle hohe Töne für BUY
+                    winsound.Beep(1000, 200)
+                    time.sleep(0.1)
+                    winsound.Beep(1200, 200)
+                elif signal_type == "SELL":
+                    # Zwei schnelle tiefe Töne für SELL
+                    winsound.Beep(600, 200)
+                    time.sleep(0.1)
+                    winsound.Beep(400, 200)
+            except:
+                pass
+        
+        if AUDIO_AVAILABLE:
+            threading.Thread(target=play_signal, daemon=True).start()
+    
+    @staticmethod
+    def startup_sound():
+        """🚀 Bot Start Sound"""
+        def play_startup():
+            try:
+                # Aufsteigende Startup-Melodie
+                notes = [440, 523, 659, 783, 1046]  # A, C, E, G, C
+                for note in notes:
+                    winsound.Beep(note, 150)
+                    time.sleep(0.05)
+            except:
+                pass
+        
+        if AUDIO_AVAILABLE:
+            threading.Thread(target=play_startup, daemon=True).start()
+    
+    @staticmethod
+    def shutdown_sound():
+        """🛑 Bot Shutdown Sound"""
+        def play_shutdown():
+            try:
+                # Absteigende Shutdown-Melodie
+                notes = [1046, 783, 659, 523, 440]  # C, G, E, C, A
+                for note in notes:
+                    winsound.Beep(note, 200)
+                    time.sleep(0.1)
+            except:
+                pass
+        
+        if AUDIO_AVAILABLE:
+            threading.Thread(target=play_shutdown, daemon=True).start()
+
+
 class LiveBybitTradingBot:
     """Enhanced Smart Money Trading Bot mit echtem Bybit Account"""
     
@@ -40,9 +170,13 @@ class LiveBybitTradingBot:
         self.trades_made = 0
         self.total_profit = 0.0
         
-        print("LIVE BYBIT TRADING BOT INITIALISIERT")
-        print(f"API Key: {self.api_key}")
-        print(f"Testnet: {testnet}")
+        print("🚀 LIVE BYBIT TRADING BOT INITIALISIERT")
+        print(f"🔑 API Key: {self.api_key}")
+        print(f"🧪 Testnet: {testnet}")
+        
+        # 🔊 Startup Sound abspielen
+        AudioAlerts.startup_sound()
+        AudioAlerts.play_system_sound("notify")
         
     def generate_signature(self, timestamp, payload):
         """Generiert korrekte Bybit V5 Signature"""
@@ -143,12 +277,23 @@ class LiveBybitTradingBot:
         
         if result and result.get('retCode') == 0:
             order_id = result['result']['orderId']
-            print(f"ORDER EXECUTED: {side} {qty} {symbol} | Order ID: {order_id}")
+            print(f"✅ ORDER EXECUTED: {side} {qty} {symbol} | Order ID: {order_id}")
             self.trades_made += 1
+            
+            # 🔊 Success Sound abspielen
+            AudioAlerts.play_system_sound("success")
+            if side == "Buy":
+                AudioAlerts.celebrate_profit()
+            
             return {'success': True, 'order_id': order_id}
         else:
             error_msg = result.get('retMsg', 'Unknown error') if result else 'No response'
-            print(f"ORDER FAILED: {error_msg}")
+            print(f"❌ ORDER FAILED: {error_msg}")
+            
+            # 🔊 Error Sound abspielen
+            AudioAlerts.play_system_sound("error")
+            AudioAlerts.alert_loss()
+            
             return {'success': False, 'error': error_msg}
     
     def enhanced_smart_money_analysis(self, price_data):
@@ -182,8 +327,12 @@ class LiveBybitTradingBot:
             confidence = 0.4
         
         if signal:
-            print(f"Smart Money Signal: {signal} (Confidence: {confidence:.2f})")
-            print(f"   Price: ${current_price:.2f} | 24h Change: {change_24h:+.2f}%")
+            print(f"🎯 Smart Money Signal: {signal} (Confidence: {confidence:.2f})")
+            print(f"   💰 Price: ${current_price:.2f} | 📈 24h Change: {change_24h:+.2f}%")
+            
+            # 🔊 Signal Detection Sound
+            AudioAlerts.signal_detected(signal)
+            AudioAlerts.play_system_sound("warning")
         
         return {'signal': signal, 'confidence': confidence} if signal else None
     
@@ -197,7 +346,8 @@ class LiveBybitTradingBot:
         
         # Minimum confidence für Trading
         if confidence < 0.5:
-            print(f"Signal too weak (Confidence: {confidence:.2f}) - Skipping trade")
+            print(f"⚠️ Signal too weak (Confidence: {confidence:.2f}) - Skipping trade")
+            AudioAlerts.play_custom_beep(300, 100)  # Short low beep
             return
         
         if signal == 'BUY' and usdt_balance > 10:
@@ -205,21 +355,21 @@ class LiveBybitTradingBot:
             trade_amount = min(10, usdt_balance * 0.2)  # 20% oder max $10
             btc_qty = trade_amount / self.get_btc_price()['price']
             
-            print(f"EXECUTING BUY: ${trade_amount:.2f} worth of BTC ({btc_qty:.6f} BTC)")
+            print(f"🚀 EXECUTING BUY: ${trade_amount:.2f} worth of BTC ({btc_qty:.6f} BTC)")
             result = self.place_order('BTCUSDT', 'Buy', 'Market', btc_qty)
             
             if result['success']:
-                print(f"BUY ORDER SUCCESSFUL!")
+                print(f"💚 BUY ORDER SUCCESSFUL!")
         
         elif signal == 'SELL' and btc_balance > 0.0001:
             # SELL BTC für USDT
             sell_qty = min(0.001, btc_balance * 0.2)  # 20% oder max 0.001 BTC
             
-            print(f"EXECUTING SELL: {sell_qty:.6f} BTC")
+            print(f"📉 EXECUTING SELL: {sell_qty:.6f} BTC")
             result = self.place_order('BTCUSDT', 'Sell', 'Market', sell_qty)
             
             if result['success']:
-                print(f"SELL ORDER SUCCESSFUL!")
+                print(f"💙 SELL ORDER SUCCESSFUL!")
     
     def run_live_trading(self, duration_minutes=60):
         """Startet Live Trading Session"""
@@ -266,20 +416,27 @@ class LiveBybitTradingBot:
                 
                 # 4. Execute trade if signal found
                 if signal_data:
+                    print("🎯 TRADING SIGNAL DETECTED!")
+                    AudioAlerts.play_system_sound("warning")
                     self.execute_trade(signal_data, balances)
                 else:
-                    print("No strong signal - HOLDING")
+                    print("😐 No strong signal - HOLDING")
+                    AudioAlerts.play_custom_beep(200, 50)  # Very short low beep for no signal
                 
                 # 5. Wait before next analysis
                 print("Waiting 2 minutes for next analysis...")
                 time.sleep(120)  # 2 minutes between analyses
                 
         except KeyboardInterrupt:
-            print("\nTrading stopped by user (Ctrl+C)")
+            print("\n🛑 Trading stopped by user (Ctrl+C)")
+            AudioAlerts.shutdown_sound()
         except Exception as e:
-            print(f"\nError in trading loop: {e}")
+            print(f"\n💥 Error in trading loop: {e}")
+            AudioAlerts.play_system_sound("error")
         
         finally:
+            print("🏁 Generating final report...")
+            AudioAlerts.play_system_sound("notify")
             self.generate_final_report(balances)
     
     def generate_final_report(self, initial_balances):
