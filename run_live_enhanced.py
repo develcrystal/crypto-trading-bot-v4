@@ -354,13 +354,13 @@ class LiveTradingEngine:
             check_interval: Prüfintervall in Sekunden
             duration_hours: Trading-Dauer in Stunden (Standard: 7 Tage)
         """
-        logger.info("🚀 STARTE LIVE TRADING MIT ENHANCED SMART MONEY STRATEGY")
+        logger.info("STARTE LIVE TRADING MIT ENHANCED SMART MONEY STRATEGY")
         logger.info("="*60)
-        logger.info(f"📊 Symbol: {symbol}")
-        logger.info(f"⏱️ Timeframe: {timeframe}")
-        logger.info(f"🔄 Check Interval: {check_interval} Sekunden")
-        logger.info(f"⏰ Duration: {duration_hours} Stunden")
-        logger.info(f"🧪 TESTNET MODE: Simulierte Trades")
+        logger.info(f"Symbol: {symbol}")
+        logger.info(f"Timeframe: {timeframe}")
+        logger.info(f"Check Interval: {check_interval} Sekunden")
+        logger.info(f"Duration: {duration_hours} Stunden")
+        logger.info(f"TESTNET MODE: Simulierte Trades")
         logger.info("="*60)
         
         self.running = True
@@ -474,11 +474,11 @@ class LiveTradingEngine:
 
 def main():
     """Hauptfunktion für Live Trading."""
-    print("🚀 ENHANCED SMART MONEY STRATEGY - LIVE TRADING")
+    print("ENHANCED SMART MONEY STRATEGY - LIVE TRADING")
     print("="*60)
-    print("🧪 TESTNET MODE - Simulierte Trades")
-    print("🧠 Market Regime Detection aktiviert")
-    print("⚙️ Adaptive Parameter-Anpassung")
+    print("TESTNET MODE - Simulierte Trades")
+    print("Market Regime Detection aktiviert")
+    print("Adaptive Parameter-Anpassung")
     print("="*60)
     
     # Trading Engine initialisieren
