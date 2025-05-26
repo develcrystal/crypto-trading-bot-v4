@@ -95,8 +95,8 @@ def render_trade_history(session_state, trade_data=None):
         filtered_data = filtered_data[filtered_data['Side'] == 'Sell']
     
     # Profit filter
-    filtered_data = filtered_data[filtered_data['PnL'] >= min_profit]
-    
+    # Profit filter - ensure PnL is numeric
+    filtered_data = filtered_data[pd.to_numeric(filtered_data['PnL'], errors='coerce').fillna(0) >= min_profit]
     # Render the trade table
     if not filtered_data.empty:
         # Format the dataframe for display

@@ -40,7 +40,7 @@ def main():
             "--theme.secondaryBackgroundColor", "#1E1E1E"
         ]
         
-        print("🎯 Starting dashboard on http://localhost:8505")
+        print("🎯 Starting dashboard on http://localhost:8501")
         print("📊 Loading modular components...")
         
         subprocess.run(cmd)
