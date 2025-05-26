@@ -31,7 +31,7 @@
 
 ## 🚀 Aktueller Status (Mai 2025)
 
-- **Version**: 2.2.1-advanced-dashboard-live
+- **Version**: 2.2.2-modular-dashboard-live
 - **API Integration**: ✅ **VOLLSTÄNDIG FUNKTIONSFÄHIG** - $83.38 USDT confirmed
 - **Live Trading**: ✅ **PRODUCTION ACTIVE** - Bybit Mainnet operational
 - **Enhanced Strategy**: ✅ **LIVE DEPLOYED** - Market Regime Detection aktiv
@@ -68,9 +68,9 @@ cp .env.example .env
 
 ### 3. Live Trading Starten
 ```bash
-# ADVANCED Dashboard (Professional Interface)
-START_ADVANCED_DASHBOARD.bat
-# URL: http://localhost:8501 (Advanced Trading Interface)
+# MODULAR Dashboard (Professional Interface)
+START_MODULAR_DASHBOARD.bat
+# URL: http://localhost:8505 (Modular Trading Interface)
 
 # Live Trading Bot mit Audio Alerts
 START_COMPLETE_SYSTEM_WITH_AUDIO.bat
@@ -188,12 +188,12 @@ Das Advanced Dashboard bietet eine vollständige Trading-Platform-Erfahrung:
 
 ### Dashboard Zugriff
 ```bash
-# Advanced Dashboard starten
-START_ADVANCED_DASHBOARD.bat
+# Modular Dashboard starten
+START_MODULAR_DASHBOARD.bat
 
 # Oder manuell:
-streamlit run monitoring/advanced_live_dashboard.py --server.port 8501
-# Browser: http://localhost:8501
+python launch_modular_dashboard.py
+# Browser: http://localhost:8505
 ```
 
 ---
@@ -236,9 +236,9 @@ python test_audio_alerts.py
 ### Dashboard Zugriff
 ```bash
 # Dashboard starten
-streamlit run monitoring/advanced_live_dashboard.py --server.port 8501
+python launch_modular_dashboard.py
 
-# Browser öffnet automatisch: http://localhost:8501
+# Browser öffnet automatisch: http://localhost:8505
 ```
 
 ---
@@ -247,7 +247,7 @@ streamlit run monitoring/advanced_live_dashboard.py --server.port 8501
 
 ### Live Trading Components
 1. **`live_trading_bot_clean.py`** - Hauptbot ohne Unicode-Probleme
-2. **`advanced_live_dashboard.py`** - Real-time Dashboard
+2. **`ui/main_dashboard.py`** - Real-time Dashboard (Modular)
 3. **`START_LIVE_TRADING_MAINNET.bat`** - Ein-Klick Deployment
 4. **Enhanced Strategy Engine** - Smart Money Algorithmus
 5. **Real-time API Integration** - Bybit V5 Live Connection
@@ -266,21 +266,29 @@ streamlit run monitoring/advanced_live_dashboard.py --server.port 8501
 ```
 crypto-bot_V2/
 ├── 🚀 live_trading_bot_clean.py    # LIVE MAINNET BOT (Unicode-frei)
-├── 📊 START_LIVE_TRADING_MAINNET.bat # Ein-Klick Start
-├── 
-├── monitoring/
-│   └── advanced_live_dashboard.py   # Real-time Dashboard (FUNKTIONIERT)
-├── 
+├── 📊 START_MODULAR_DASHBOARD.bat  # Ein-Klick Start für modulares Dashboard
+├──
+├── ui/
+│   ├── main_dashboard.py           # Haupt-Dashboard (Orchestriert Module)
+│   ├── components/                 # Modulare UI-Komponenten
+│   │   ├── data_manager.py         # Session State & API
+│   │   └── layout_manager.py       # Styling & Theme
+│   └── widgets/                    # Modulare UI-Widgets
+│       ├── order_book.py           # Bids/Asks Visualization
+│       ├── portfolio_monitor.py    # Balance & Risk Tracking
+│       ├── price_widget.py         # Live BTC Preise
+│       └── trading_controls.py     # Bot Controls & Signale
+├──
 ├── strategies/
 │   ├── smart_money.py              # Smart Money Strategy
 │   └── enhanced_smart_money.py     # Enhanced Version
-├── 
+├──
 ├── exchange/
 │   └── bybit_api.py                # Bybit V5 API (100% funktional)
-├── 
+├──
 ├── config/
 │   └── config.py                   # Live-optimierte Konfiguration
-├── 
+├──
 └── .env                            # MAINNET Credentials (TESTNET=false)
 ```
 
