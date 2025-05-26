@@ -24,7 +24,9 @@ except ImportError:
     print("⚠️ Audio alerts nicht verfügbar (winsound nicht installiert)")
 
 # Environment laden
-load_dotenv()
+from pathlib import Path
+dotenv_path = Path('.env')
+load_dotenv(dotenv_path=dotenv_path)
 
 # API Configuration 
 api_key = os.getenv('BYBIT_API_KEY')
@@ -108,7 +110,7 @@ class AudioAlerts:
     
     @staticmethod
     def signal_detected(signal_type):
-        """🎯 Signal Detection Sounds"""
+        """Signal Detection Sounds"""
         def play_signal():
             try:
                 if signal_type == "BUY":
@@ -129,7 +131,7 @@ class AudioAlerts:
     
     @staticmethod
     def startup_sound():
-        """🚀 Bot Start Sound"""
+        """Bot Start Sound"""
         def play_startup():
             try:
                 # Aufsteigende Startup-Melodie
@@ -145,7 +147,7 @@ class AudioAlerts:
     
     @staticmethod
     def shutdown_sound():
-        """🛑 Bot Shutdown Sound"""
+        """Bot Shutdown Sound"""
         def play_shutdown():
             try:
                 # Absteigende Shutdown-Melodie
@@ -170,9 +172,9 @@ class LiveBybitTradingBot:
         self.trades_made = 0
         self.total_profit = 0.0
         
-        print("🚀 LIVE BYBIT TRADING BOT INITIALISIERT")
-        print(f"🔑 API Key: {self.api_key}")
-        print(f"🧪 Testnet: {testnet}")
+        print("LIVE BYBIT TRADING BOT INITIALISIERT")
+        print(f"API Key: {self.api_key}")
+        print(f"Testnet: {testnet}")
         
         # 🔊 Startup Sound abspielen
         AudioAlerts.startup_sound()

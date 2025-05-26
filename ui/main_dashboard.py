@@ -113,11 +113,11 @@ def render_professional_chart():
 def main_dashboard():
     """Main dashboard application with modular components"""
     
+    # Set page config FIRST as the very first Streamlit command
+    create_responsive_layout()
+    
     # Initialize data manager FIRST to setup session state
     data_manager = get_data_manager()
-    
-    # Initialize layout and theme AFTER session state is ready
-    create_responsive_layout()
     
     # Apply theme (now dark_mode should exist)
     apply_theme(st.session_state.get('dark_mode', True))
