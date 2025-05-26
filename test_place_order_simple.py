@@ -12,19 +12,38 @@ def test_place_order():
         secret_key = os.getenv('BYBIT_API_SECRET')
         testnet = os.getenv('TESTNET', 'true').lower() == 'true'
         
+        print(f"Testing Order Placement on {'TESTNET' if testnet else 'MAINNET'}")
+        
         api_client = BybitAPI(api_key=api_key, api_secret=secret_key, testnet=testnet)
+        
+        # Bybit Spot Minimum: 5 USDT oder 0.000011 BTC
+        # Test mit 10 USDT um sicher über dem Minimum zu sein
         order_response = api_client.place_order(
             symbol="BTCUSDT",
             side="Buy",
             order_type="Market",
-            qty=0.01
+            qty=10.0  # 10 USDT - deutlich über dem 5 USDT Minimum
         )
-        if order_response['success']:
-            print(f"Manual buy order executed: {order_response['result']}")
+        
+        print(f"Order Response: {order_response}")
+        
+        if order_response and order_response.get('success'):
+            # Angepasst für korrektes Response Format
+            order_id = order_response.get('order_id')
+            print(f"SUCCESS! Buy order executed with Order ID: {order_id}")
+            print(f"Full response: {order_response}")
+            return True
         else:
-            print(f"Failed to execute buy order: {order_response['error']}")
+            print(f"FAILED! Error: {order_response.get('error', 'Unknown error') if order_response else 'No response'}")
+            print(f"Full response: {order_response}")
+            return False
+            
     except Exception as e:
-        print(f"Error placing buy order: {str(e)}")
+        print(f"Exception Error: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return False
 
 if __name__ == "__main__":
-    test_place_order()
+    success = test_place_order()
+    print(f"\n{'🎉 ECHTER TRADE ERFOLGREICH!' if success else '❌ Test FAILED!'}")

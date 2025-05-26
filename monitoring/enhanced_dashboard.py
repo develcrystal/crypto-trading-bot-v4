@@ -16,8 +16,8 @@ import json
 import time
 from typing import Dict, List, Optional
 
-# Import Live API
-from live_bybit_api import LiveBybitAPI
+# Import Corrected Live API
+from corrected_live_api import LiveBybitAPI
 
 # ============================================================================
 # CONFIGURATION & SETUP
@@ -66,8 +66,8 @@ class EnhancedDataProvider:
     """Advanced data provider for enhanced dashboard"""
     
     def __init__(self):
+        self.live_api = LiveBybitAPI()  # Initialize API first
         self.session_state = self._init_session_state()
-        self.live_api = LiveBybitAPI()
         
     def _init_session_state(self):
         """Initialize session state with realistic data"""
@@ -76,8 +76,8 @@ class EnhancedDataProvider:
             dates = pd.date_range(start=datetime.now() - timedelta(days=30), periods=720, freq='H')
             
             # Get current live balance
-            live_data = self.live_api.get_dashboard_data()
-            if live_data['success']:
+            live_data = self.live_api.get_all_dashboard_data()
+            if live_data.get('success'):
                 current_value = live_data['portfolio_value']
             else:
                 current_value = 83.38  # Fallback
@@ -90,11 +90,14 @@ class EnhancedDataProvider:
             for i in range(len(returns)):
                 portfolio_values.insert(0, portfolio_values[0] / (1 + returns[-(i+1)]))
             
+            # Ensure all arrays have same length
+            portfolio_values = portfolio_values[:len(dates)]
+            
             st.session_state.portfolio_history = pd.DataFrame({
                 'timestamp': dates,
-                'portfolio_value': portfolio_values[:-1],
-                'pnl': np.array(portfolio_values[:-1]) - portfolio_values[0],
-                'return_pct': (np.array(portfolio_values[:-1]) / portfolio_values[0] - 1) * 100
+                'portfolio_value': portfolio_values,
+                'pnl': np.array(portfolio_values) - portfolio_values[0],
+                'return_pct': (np.array(portfolio_values) / portfolio_values[0] - 1) * 100
             })
             
         if 'trades_history' not in st.session_state:

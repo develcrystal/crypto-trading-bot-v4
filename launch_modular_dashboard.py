@@ -33,7 +33,6 @@ def main():
         cmd = [
             sys.executable, "-m", "streamlit", "run", 
             str(dashboard_path),
-            "--server.port", "8505",
             "--server.address", "localhost",
             "--theme.base", "dark",
             "--theme.primaryColor", "#e74c3c",

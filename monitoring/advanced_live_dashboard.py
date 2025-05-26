@@ -26,8 +26,13 @@ from pathlib import Path
 # Add root directory to Python path for module imports
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from ui.advanced_chart import SmartMoneyChart
-from core.api_client import BybitAPIClient
+# Import corrected APIs
+from exchange.bybit_api import BybitAPI
+try:
+    from corrected_live_api import LiveBybitAPI
+except ImportError:
+    print("Warning: corrected_live_api not found, using fallback")
+    LiveBybitAPI = None
 
 # Import LIVE API for REAL $50.00 USDT Balance
 from live_bybit_api import LiveBybitAPI
@@ -265,16 +270,20 @@ def refresh_all_data():
             'timestamp': datetime.now() # Use current time for dashboard display
         }
         
-        # Load chart data using SmartMoneyChart
-        # Load chart data using SmartMoneyChart
-        chart_instance = SmartMoneyChart(api_client=api_client, symbol="BTCUSDT", timeframe="5")
-        if chart_instance.load_data():
-            st.session_state.chart_data = {
-                'success': True,
-                'data': chart_instance.data
-            }
+        # Load chart data using simple API calls
+    # Simple chart data instead of complex chart component
+    try:
+        if LiveBybitAPI:
+            api = LiveBybitAPI()
+            chart_data = api.get_kline_data("BTCUSDT", "5", 100)
+            if chart_data.get('success'):
+                st.session_state.chart_data = chart_data
+            else:
+                st.session_state.chart_data = {'success': False, 'error': 'Failed to load chart data'}
         else:
-            st.session_state.chart_data = {'success': False, 'error': 'Failed to load chart data'}
+            st.session_state.chart_data = {'success': False, 'error': 'LiveBybitAPI not available'}
+    except Exception as e:
+        st.session_state.chart_data = {'success': False, 'error': str(e)}
     else:
         # Set error states
         error_msg = dashboard_data.get('error', 'Unknown API error from get_dashboard_data')
@@ -395,25 +404,47 @@ def render_order_book():
         st.error("❌ Unable to fetch order book data")
 
 def render_professional_chart():
-    """Render professional trading chart using SmartMoneyChart component with all features"""
+    """Render professional trading chart with candlestick data"""
     st.markdown("### 📈 SMART MONEY TRADING CHART")
     
-    chart_data = st.session_state.chart_data
+    chart_data = st.session_state.get('chart_data', {'success': False})
     
     if chart_data.get('success') and chart_data.get('data') is not None:
-        # Create SmartMoneyChart instance
-        from ui.advanced_chart import SmartMoneyChart
-        from core.api_client import BybitAPIClient
-        
-        # Initialize with API client
-        api_client = BybitAPIClient()
-        chart = SmartMoneyChart(api_client=api_client, symbol="BTCUSDT", timeframe="5")
-        
-        # Load data directly from session state
-        chart.data = chart_data['data']
-        
-        # Render the chart with all features
-        fig = chart.render_chart(height=600)
+        # Create simple candlestick chart with plotly
+        try:
+            import pandas as pd
+            
+            # Convert chart data to DataFrame
+            df = pd.DataFrame(chart_data['data'])
+            
+            if not df.empty and 'timestamp' in df.columns:
+                # Create candlestick chart
+                fig = go.Figure(data=go.Candlestick(
+                    x=df['timestamp'],
+                    open=df['open'],
+                    high=df['high'],
+                    low=df['low'],
+                    close=df['close'],
+                    name='BTCUSDT'
+                ))
+                
+                fig.update_layout(
+                    title='BTC/USDT Chart',
+                    xaxis_title='Time',
+                    yaxis_title='Price (USDT)',
+                    height=400,
+                    template='plotly_dark'
+                )
+                
+                st.plotly_chart(fig, use_container_width=True)
+            else:
+                st.error("❌ Invalid chart data format")
+        except Exception as e:
+            st.error(f"❌ Chart rendering error: {str(e)}")
+    else:
+        st.warning("No chart data available or error loading chart data.")
+        if chart_data.get('error'):
+            st.error(f"Error: {chart_data['error']}")
         
         if fig:
             # Update layout for better visibility

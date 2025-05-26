@@ -40,6 +40,7 @@ from ui.widgets.price_widget import render_live_price_widget
 from ui.widgets.order_book import render_order_book
 from ui.widgets.portfolio_monitor import render_portfolio_monitor, render_position_tracking
 from ui.widgets.trading_controls import render_trading_controls, render_live_signals
+from ui.widgets.trade_history import render_trade_history
 
 from ui.advanced_chart import SmartMoneyChart
 from core.api_client import BybitAPIClient
@@ -183,12 +184,10 @@ def main_dashboard():
     col1, col2 = st.columns([2, 1])
     
     with col1:
-        # Get live account data
-        live_account = data_manager.get_live_account_data()
-        render_portfolio_monitor(live_account, st.session_state.get('trading_active', False))
+        from ui.components.real_balance import render_real_balances
+        render_real_balances()
         
         # Show 50€ optimized metrics
-        st.markdown("#### 💡 50€ Trading Optimization")
         metrics_50 = get_50eur_metrics()
         
         metric_col1, metric_col2, metric_col3 = st.columns(3)
@@ -225,6 +224,10 @@ def main_dashboard():
     # Position tracking if trading is active
     if st.session_state.get('trading_active', False):
         render_position_tracking(st.session_state.trading_active)
+    
+    # Trade History Table
+    st.markdown("---")
+    render_trade_history(st.session_state)
     
     # Auto refresh logic
     if auto_refresh or main_auto_refresh:

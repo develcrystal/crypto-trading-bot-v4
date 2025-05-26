@@ -49,6 +49,12 @@ def init_dashboard_session_state():
     if 'chart_data' not in st.session_state:
         st.session_state.chart_data = {'success': False}
     
+    # Trade history state
+    if 'trade_history' not in st.session_state:
+        # Import here to avoid circular import
+        from ui.widgets.trade_history import create_sample_trade_history
+        st.session_state.trade_history = create_sample_trade_history()
+    
     return True
 
 
