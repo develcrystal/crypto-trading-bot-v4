@@ -144,6 +144,21 @@ SESSION_DURATION=480min  # 8 Stunden Auto-Trading
 ### 🚀 **PROFESSIONAL TRADING INTERFACE** 
 Das Advanced Dashboard bietet eine vollständige Trading-Platform-Erfahrung:
 
+#### 📸 Dashboard Vorschau
+
+| Feature | Screenshot |
+|---------|------------|
+| **Vollständiges Dashboard** | ![Dashboard Overview](https://raw.githubusercontent.com/develcrystal/Crypto-Trading-Bot-V2/main/assets/images/dashboard-overview.png) |
+| **Smart Money Chart** | ![Smart Money Chart](https://raw.githubusercontent.com/develcrystal/Crypto-Trading-Bot-V2/main/assets/images/smart-money-chart.png) |
+| **Live Order Book** | ![Order Book](https://raw.githubusercontent.com/develcrystal/Crypto-Trading-Bot-V2/main/assets/images/order-book.png) |
+| **Portfolio & Trading Controls** | ![Portfolio](https://raw.githubusercontent.com/develcrystal/Crypto-Trading-Bot-V2/main/assets/images/portfolio-controls.png) |
+
+*Hinweis: Die Screenshots zeigen das Live-Trading-Interface mit echten Marktdaten.*
+
+---
+
+### 📊 **HAUPTFUNKTIONEN**
+
 #### **📈 Live Charts & Market Data:**
 - ✅ **Professional Candlestick Charts** mit EMA-Lines & Volume
 - ✅ **Live Order Book** Visualization (Real-time Bids/Asks)

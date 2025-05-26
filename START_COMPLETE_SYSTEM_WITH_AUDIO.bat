@@ -40,7 +40,7 @@ timeout /t 5 /nobreak > nul
 
 REM Open browser to dashboard
 echo 🌐 Öffne Dashboard im Browser...
-start http://localhost:8501
+REM start http://localhost:8501
 
 echo.
 echo 🚀 SYSTEM BEREIT!

@@ -163,8 +163,50 @@ def get_live_account_data():
     else:
         return {'success': False, 'error': result}
 
+def apply_theme(dark_mode):
+    """Apply theme to the app"""
+    if dark_mode:
+        st.markdown("""
+        <style>
+            .stApp {
+                background-color: #0E1117;
+                color: #FFFFFF;
+            }
+            .css-1d391kg, .css-1y4q8m0 {
+                background-color: #1E1E1E !important;
+                color: #FFFFFF !important;
+            }
+        </style>
+        """, unsafe_allow_html=True)
+    else:
+        st.markdown("""
+        <style>
+            .stApp {
+                background-color: #FFFFFF;
+                color: #000000;
+            }
+            .css-1d391kg, .css-1y4q8m0 {
+                background-color: #F8FAFC !important;
+                color: #1E293B !important;
+            }
+        </style>
+        """, unsafe_allow_html=True)
+
 # Initialize session state
 def initialize_session_state():
+    if 'initialized' not in st.session_state:
+        st.session_state.initialized = True
+        st.session_state.live_data = {}
+        st.session_state.account_balance = {}
+        st.session_state.order_book = {}
+        st.session_state.chart_data = {}
+        st.session_state.last_update = None
+        st.session_state.refresh_interval = 5  # seconds
+        st.session_state.auto_refresh = True
+        st.session_state.trading_enabled = False
+        st.session_state.emergency_stop = False
+        st.session_state.dark_mode = True  # Default to dark mode
+    
     if 'live_data' not in st.session_state:
         st.session_state.live_data = {'success': False}
     
@@ -630,29 +672,45 @@ def render_live_signals():
         
         for filter_name, status in filters:
             if status:
-                st.success(f"✅ {filter_name}")
+                st.success(f"{filter_name}")
             else:
-                st.error(f"❌ {filter_name}")
+                st.error(f"{filter_name}")
 
 # Main dashboard layout
 def main():
+    # Initialize session state
+    initialize_session_state()
+    
+    # Apply theme
+    apply_theme(st.session_state.dark_mode)
+    
+    # Theme toggle button in header
+    with st.sidebar:
+        col1, col2 = st.columns([1, 2])
+        with col1:
+            st.markdown("" if st.session_state.dark_mode else "", unsafe_allow_html=True)
+        with col2:
+            if st.button("Dark Mode" if not st.session_state.dark_mode else "Light Mode"):
+                st.session_state.dark_mode = not st.session_state.dark_mode
+                st.rerun()
+    
     render_main_header()
     
     # Refresh controls
     col1, col2, col3 = st.columns([2, 1, 1])
     
     with col1:
-        if st.button("🔄 Refresh All Data", type="primary"):
+        if st.button("Refresh All Data", type="primary"):
             with st.spinner("Refreshing live data..."):
                 refresh_all_data()
             st.success("Data refreshed!")
             st.rerun()
     
     with col2:
-        auto_refresh = st.checkbox("🔄 Auto-Refresh (30s)")
+        auto_refresh = st.checkbox("Auto-Refresh (30s)")
     
     with col3:
-        st.markdown(f'<div class="live-indicator">🔴 LIVE</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="live-indicator">LIVE</div>', unsafe_allow_html=True)
     
     st.markdown("---")
     

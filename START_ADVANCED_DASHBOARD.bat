@@ -58,7 +58,6 @@ echo 📊 Professionelle Trading Charts wie TradingView!
 echo 🎮 Vollständige Bot-Kontrolle inklusive!
 echo ⚡ Live Signale mit 4-Filter-System!
 echo.
-echo 🌐 Dashboard läuft auf: http://localhost:8501
 echo.
 
 timeout /t 3 /nobreak > nul
