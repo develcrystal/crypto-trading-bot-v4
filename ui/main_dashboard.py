@@ -11,19 +11,24 @@ Diese modulare Version teilt die große Dashboard-Datei in wartbare Komponenten 
 - Chart-Komponente für Smart Money Analysis
 """
 
+import os
+import sys
+
+# Set up Python path before any imports
+PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if PROJECT_DIR not in sys.path:
+    sys.path.insert(0, PROJECT_DIR)
+
+# Now import other modules
 import streamlit as st
 import time
 from datetime import datetime
-import sys
-import os
 
-# FIRST: Initialize session state BEFORE anything else
+# Import local modules after path setup
 from ui.session_init import init_dashboard_session_state
-init_dashboard_session_state()
 
-# Add paths for imports
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+# Initialize session state
+init_dashboard_session_state()
 
 # Import modular components
 from ui.components.layout_manager import (
@@ -43,7 +48,7 @@ from ui.widgets.trading_controls import render_trading_controls, render_live_sig
 from ui.widgets.trade_history import render_trade_history
 
 from ui.advanced_chart import SmartMoneyChart
-from core.api_client import BybitAPIClient
+from core.api_client import BybitAPI
 
 
 def render_professional_chart():
@@ -55,7 +60,7 @@ def render_professional_chart():
     if chart_data.get('success') and chart_data.get('data') is not None:
         try:
             # Create SmartMoneyChart instance
-            api_client = BybitAPIClient()
+            api_client = BybitAPI()
             chart = SmartMoneyChart(api_client=api_client, symbol="BTCUSDT", timeframe="5")
             
             # Load data directly from session state

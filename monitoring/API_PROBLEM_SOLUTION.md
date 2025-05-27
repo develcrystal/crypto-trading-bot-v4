@@ -1,129 +1,57 @@
-# 🔧 BYBIT API PROBLEM - SOFORTLÖSUNG
+# 🚀 LIVE MAINNET DASHBOARD - FIXED API INTEGRATION
 
-## 🚨 **PROBLEM IDENTIFIZIERT:**
+## 📋 API PROBLEME BEHOBEN
 
-Das Dashboard zeigt **"API Connection Issue"** weil:
-1. Die Config-Klasse hat hardcoded API-Schlüssel (`YOUR_BYBIT_API_KEY`)
-2. Das Live-Dashboard lädt nicht die .env-Werte
-3. Private API-Endpunkte (Wallet/Trade History) schlagen fehl
+Die `corrected_live_api.py` implementiert nun die korrekte Behandlung von Spot-Trading-Orders und Positionen. Folgende Probleme wurden behoben:
 
-## ✅ **SOFORTLÖSUNG - 3 OPTIONEN:**
+1. **Falscher Endpoint** - Der Endpoint für offene Spot-Orders wurde von `/v5/position/list` zu `/v5/order/realtime` geändert
+2. **Falscher Parameter** - Die Kategorie wurde von `linear` zu `spot` geändert
+3. **Fehlerhafte Positionslogik** - Die Logik zur Erkennung von offenen Positionen wurde überarbeitet
+4. **Robustere Implementierung** - Fehlerbehandlung wurde verbessert
 
-### **Option 1: Fixed Dashboard (Empfohlen)**
+## 🚀 DASHBOARD STARTEN
+
 ```bash
-# Starte das reparierte Dashboard
-START_LIVE_FIXED.bat
+# Dashboard starten
+cd "J:\Meine Ablage\CodingStuff\crypto-bot_V2\monitoring"
+streamlit run LIVE_MAINNET_DASHBOARD.py --server.port 8504
 
-# URL: http://localhost:8505
-# Features: Direkte .env-Ladung, API-Debug-Info in Sidebar
+# Oder alternative Startmethode
+cd "J:\Meine Ablage\CodingStuff\crypto-bot_V2"
+streamlit run monitoring/LIVE_MAINNET_DASHBOARD.py --server.port 8504
 ```
 
-### **Option 2: API-Debug-Test**
-```bash
-# Teste API-Verbindung direkt
-DEBUG_API.bat
+## 📊 FEATURES
 
-# Zeigt: Schritt-für-Schritt Verbindungstest
-# Ergebnis: Genaue Fehleranalyse
-```
+- **Live Portfolio Tracking** - Echte $83.38 USDT Balance
+- **BTC Live Price** - Real-time Bybit Preise mit 24h Stats
+- **Manual Trading** - Market/Limit Orders mit SL/TP
+- **Bot Status Monitor** - Process ID, Uptime, Market Regime
+- **Emergency Controls** - Stop Bot, Close Positions
+- **Order Book Display** - Live Bids/Asks
+- **Professional Charts** - Kline Data für Visualization
 
-### **Option 3: Manuelle Config-Reparatur**
+## 🛠️ API INTEGRATION PRÜFEN
+
+Das Dashboard verbindet sich nun automatisch mit der korrigierten API-Implementierung. Wenn Probleme auftreten, können Sie manuell die API testen:
+
 ```python
-# Editiere: config/config.py
-# Ändere von:
-BYBIT_API_KEY = "YOUR_BYBIT_API_KEY"
+# In Python Console oder Script:
+from monitoring.corrected_live_api import LiveBybitAPI
 
-# Zu:
-import os
-from dotenv import load_dotenv
-load_dotenv()
-BYBIT_API_KEY = os.getenv('BYBIT_API_KEY')
-BYBIT_API_SECRET = os.getenv('BYBIT_API_SECRET')
+api = LiveBybitAPI()
+result = api.get_dashboard_data()
+
+if result['success']:
+    print(f"API Connection Successful!")
+    print(f"Portfolio Value: ${result['portfolio_value']:.2f}")
+    print(f"BTC Price: ${result['btc_price']:,.2f}")
+else:
+    print(f"API Connection Failed: {result.get('error', 'Unknown error')}")
 ```
 
----
+## ⚠️ WICHTIG
 
-## 🎯 **SCHNELLSTE LÖSUNG:**
+Das Dashboard verwendet nun die korrigierte API-Implementierung über eine Redirect-Methode. Die originale `live_bybit_api.py` leitet nun zur `corrected_live_api.py` weiter, so dass keine Änderungen an anderen Dateien erforderlich sind.
 
-### **JETZT SOFORT MACHEN:**
-1. **Öffne Datei-Explorer:** `J:\Meine Ablage\CodingStuff\crypto-bot_V2\monitoring\`
-2. **Doppelklick:** `START_LIVE_FIXED.bat`
-3. **Warte 30 Sekunden** bis Browser öffnet
-4. **Schaue Sidebar:** API-Debug-Info sollte grün sein
-
-### **ERWARTETES ERGEBNIS:**
-- ✅ **API Key:** pnBTE7C... angezeigt
-- ✅ **API Secret:** ooKQEON... angezeigt  
-- ✅ **API Status:** "Full API Access - Public & Private endpoints"
-- ✅ **Wallet Data:** Echte USDT-Balance aus Testnet
-- ✅ **Trade History:** Deine tatsächlichen Orders
-
----
-
-## 🔍 **DEBUGGING-INFO FÜR DICH:**
-
-### **Deine aktuellen API-Credentials:**
-```
-API Key: pnBTE7CHK01Yhhi9Sz
-API Secret: ooKQEONyL8RUCyIl2SYgrNepXMHly9gGFjoj
-Testnet: true
-```
-
-### **Testnet-URL:** 
-- https://api-testnet.bybit.com
-- Dashboard sollte zu dieser URL verbinden
-
-### **Erwartete Bybit-Antwort:**
-```json
-{
-  "retCode": 0,
-  "retMsg": "OK",
-  "result": {
-    "list": [{
-      "coin": [{"coin": "USDT", "walletBalance": "1000.00"}]
-    }]
-  }
-}
-```
-
----
-
-## 🚀 **BACKUP-PLAN:**
-
-Falls Fixed Dashboard nicht funktioniert:
-
-### **1. Manuelle API-Test:**
-```python
-# Führe aus: debug_api_connection.py
-# Zeigt exakte Fehlermeldung
-```
-
-### **2. Config-Datei direkt editieren:**
-```python
-# Öffne: config/config.py
-# Ersetze hardcoded Werte mit os.getenv()
-```
-
-### **3. Neue API-Schlüssel generieren:**
-```
-1. Gehe zu: testnet.bybit.com
-2. API Management → Create New Key
-3. Permissions: Read + Trade
-4. Aktualisiere .env Datei
-```
-
----
-
-## 🏆 **ZIEL:**
-
-**Dashboard zeigt:**
-- 💰 **Echte Testnet-Balance** statt $1,000 Demo
-- 📊 **Live BTC-Kurs** von Bybit API
-- 📋 **Deine tatsächlichen Orders** aus Testnet
-- ✅ **Grüner API-Status** statt rotem Fehler
-
-**Starte JETZT:** `START_LIVE_FIXED.bat` 🚀
-
----
-
-© 2025 - API-Problem-Troubleshooting Guide
+**Jetzt ist das System bereit für Integration mit dem Trading Bot und für das 50€ Mainnet Deployment!**

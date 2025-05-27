@@ -34,6 +34,10 @@ class EnhancedSmartMoneyStrategy(SmartMoneyStrategy):
         super().__init__(config)
         self.name = "EnhancedSmartMoneyStrategy"
         
+        # Explizit die Attribute aus der Basisklasse übernehmen
+        self.liquidity_factor = config.get('LIQUIDITY_FACTOR', 1.0)
+        self.min_liquidity_threshold = config.get('MIN_LIQUIDITY_THRESHOLD', 1000)
+        
         # Market Regime Detection Parameter
         self.trend_lookback = config.get('TREND_LOOKBACK', 50)  # Perioden für Trendanalyse
         self.volatility_lookback = config.get('VOLATILITY_LOOKBACK', 20)  # Für Volatilitätsanalyse

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-🚀 CORRECTED BYBIT API INTEGRATION FÜR DASHBOARD
-Fehlerbehebung für Spot-Trading API-Endpunkte und Position-Tracking
+🚀 LIVE BYBIT API INTEGRATION FÜR DASHBOARD
+Echte Balance und Live Preise für das Dashboard
 """
 
 import requests
@@ -12,13 +12,11 @@ import os
 from datetime import datetime
 from dotenv import load_dotenv
 import pandas as pd
-import psutil
-import signal
 
 load_dotenv()
 
 class LiveBybitAPI:
-    """Live Bybit API Integration für Dashboard mit Fixed Spot Trading Support"""
+    """Live Bybit API Integration für Dashboard"""
     
     def __init__(self):
         self.api_key = os.getenv('BYBIT_API_KEY')
@@ -79,7 +77,7 @@ class LiveBybitAPI:
             print(error_msg)
             return {'success': False, 'error': error_msg}
         except requests.exceptions.ConnectionError:
-            error_msg = "Connection Error: Unable to connect to the Bybit API."
+            error_msg = "Connection Error: Unable to connect to the Bybit API. Check your internet connection or Bybit server status."
             print(error_msg)
             return {'success': False, 'error': error_msg}
         except Exception as e:
@@ -206,129 +204,155 @@ class LiveBybitAPI:
     def get_kline_data(self, symbol='BTCUSDT', interval='5', limit=100):
         """Get candlestick data for charts"""
         try:
-            print(f"Fetching kline data for {symbol}, interval {interval}, limit {limit}")
-            
-            # Direkte API-Anfrage ohne make_request für schnellere Ergebnisse
-            url = f"{self.base_url}/v5/market/kline"
-            
-            # Parameter für die Anfrage
             params = {
                 'category': 'spot',
                 'symbol': symbol,
                 'interval': interval,
-                'limit': str(limit)
+                'limit': limit
             }
             
-            # Debug-Ausgabe
-            print(f"Request URL: {url}")
-            print(f"Request params: {params}")
+            result = self.make_request("GET", "/v5/market/kline", payload=f"category=spot&symbol={symbol}&interval={interval}&limit={limit}")
             
-            # Anfrage senden
-            response = requests.get(url, params=params, timeout=15)
+            if result['success'] and result['data'].get('retCode') == 0:
+                klines = result['data']['result']['list']
+                df = pd.DataFrame(klines, columns=[
+                    'timestamp', 'open', 'high', 'low', 'close', 'volume', 'turnover'
+                ])
+                df['timestamp'] = pd.to_datetime(df['timestamp'].astype(int), unit='ms')
+                for col in ['open', 'high', 'low', 'close', 'volume']:
+                    df[col] = df[col].astype(float)
+                df = df.sort_values('timestamp').reset_index(drop=True)
+                return {'success': True, 'data': df}
             
-            # Debug-Ausgabe
-            print(f"Response status code: {response.status_code}")
+            return {'success': False, 'error': result.get('error', 'Failed to fetch kline data')}
             
-            if response.status_code == 200:
-                data = response.json()
-                
-                # Debug-Ausgabe
-                print(f"Response retCode: {data.get('retCode')}")
-                
-                if data.get('retCode') == 0 and 'result' in data and 'list' in data['result']:
-                    klines = data['result']['list']
-                    
-                    # Prüfen ob Daten vorhanden sind
-                    if not klines:
-                        print("No kline data returned from API")
-                        return {'success': False, 'error': 'No kline data available'}
-                    
-                    print(f"Received {len(klines)} kline records")
-                    
-                    # DataFrame erstellen
-                    df = pd.DataFrame(klines, columns=[
-                        'timestamp', 'open', 'high', 'low', 'close', 'volume', 'turnover'
-                    ])
-                    
-                    # Datentypen konvertieren
-                    df['timestamp'] = pd.to_datetime(df['timestamp'].astype(int), unit='ms')
-                    for col in ['open', 'high', 'low', 'close', 'volume', 'turnover']:
-                        df[col] = df[col].astype(float)
-                    
-                    # Sortieren und Index zurücksetzen
-                    df = df.sort_values('timestamp').reset_index(drop=True)
-                    
-                    print(f"Successfully processed {len(df)} kline records for {symbol}")
-                    
-                    # Erste und letzte Zeile zur Überprüfung ausgeben
-                    if not df.empty:
-                        print(f"First row: {df.iloc[0]['timestamp']} - Open: {df.iloc[0]['open']}, Close: {df.iloc[0]['close']}")
-                        print(f"Last row: {df.iloc[-1]['timestamp']} - Open: {df.iloc[-1]['open']}, Close: {df.iloc[-1]['close']}")
-                    
-                    return {'success': True, 'data': df}
-                else:
-                    error_msg = data.get('retMsg', 'Unknown API error')
-                    print(f"API Error: {error_msg}")
-                    return {'success': False, 'error': error_msg}
-            else:
-                print(f"HTTP Error: {response.status_code}")
-                print(f"Response content: {response.text[:200]}")
-                return {'success': False, 'error': f'HTTP Error: {response.status_code}'}
-            
-        except requests.exceptions.Timeout:
-            print("Timeout while fetching kline data")
-            return {'success': False, 'error': 'Request timeout'}
         except Exception as e:
-            print(f"Exception while getting kline data: {str(e)}")
             return {'success': False, 'error': str(e)}
 
+    def get_dashboard_data(self):
+        """Kombinierte Daten für Dashboard"""
+        balance_data = self.get_wallet_balance()
+        price_data = self.get_btc_price()
+        live_ticker_data = self.get_live_ticker()
+        order_book_data = self.get_order_book()
+        position_data = self.check_open_positions()
+        kline_data = self.get_kline_data()
+        
+        # Bot Status prüfen (Dateipfad und Process ID)
+        bot_status = self.check_bot_status()
+        
+        if (balance_data['success'] and price_data['success'] and 
+            live_ticker_data['success'] and order_book_data['success'] and 
+            kline_data['success'] and position_data['success']):
+            
+            return {
+                'portfolio_value': balance_data['total_usdt_value'],
+                'balances': balance_data['balances'],
+                'btc_price': price_data['price'],
+                'btc_change_24h': price_data['change_24h'],
+                'btc_high_24h': price_data['high_24h'],
+                'btc_low_24h': price_data['low_24h'],
+                'btc_volume_24h': price_data['volume_24h'],
+                'bid': live_ticker_data['bid'],
+                'ask': live_ticker_data['ask'],
+                'order_book_bids': order_book_data['bids'],
+                'order_book_asks': order_book_data['asks'],
+                'kline_data': kline_data['data'],
+                'open_positions': position_data['open_positions'],
+                'positions': position_data['positions'] if position_data['open_positions'] else [],
+                'bot_status': bot_status,
+                'api_status': 'CONNECTED',
+                'account_type': 'TESTNET' if self.testnet else 'MAINNET',
+                'success': True
+            }
+        else:
+            error_details = {
+                'balance_error': balance_data.get('error', 'N/A') if not balance_data['success'] else 'None',
+                'price_error': price_data.get('error', 'N/A') if not price_data['success'] else 'None',
+                'live_ticker_error': live_ticker_data.get('error', 'N/A') if not live_ticker_data['success'] else 'None',
+                'order_book_error': order_book_data.get('error', 'N/A') if not order_book_data['success'] else 'None',
+                'position_error': position_data.get('error', 'N/A') if not position_data['success'] else 'None',
+                'kline_error': kline_data.get('error', 'N/A') if not kline_data['success'] else 'None'
+            }
+            print(f"Dashboard Data Fetch Error Details: {error_details}")
+            return {
+                'success': False,
+                'api_status': 'ERROR',
+                'error': f"Failed to fetch all dashboard data. Details: {error_details}"
+            }
+
+# Test function
+def test_api():
+    """Testet die API-Verbindung"""
+    api = LiveBybitAPI()
+    
+    print("Testing Live Bybit API...")
+    print(f"API Base URL: {api.base_url}")
+    print(f"Testnet Mode: {api.testnet}")
+    
+    # Test Dashboard Data
+    result = api.get_dashboard_data()
+    
+    if result['success']:
+        print("\nAPI Connection Successful!")
+        print(f"Portfolio Value: ${result['portfolio_value']:.2f}")
+        print(f"BTC Price: ${result['btc_price']:,.2f}")
+        print(f"24h Change: {result['btc_change_24h']:+.2f}%")
+        print(f"Account: {result['account_type']}")
+        
+        print("\nBalances:")
+        for coin, amount in result['balances'].items():
+            if coin == 'USDT':
+                print(f"   {coin}: {amount:.2f}")
+            else:
+                print(f"   {coin}: {amount:.6f}")
+        
+        print("\nLive Ticker Data:")
+        print(f"  Bid: {result['bid']:.2f}")
+        print(f"  Ask: {result['ask']:.2f}")
+        
+        print("\nOrder Book Bids (first 5):")
+        for bid in result['order_book_bids'][:5]:
+            print(f"  Price: {bid[0]:.2f}, Size: {bid[1]:.4f}")
+            
+        print("\nOrder Book Asks (first 5):")
+        for ask in result['order_book_asks'][:5]:
+            print(f"  Price: {ask[0]:.2f}, Size: {ask[1]:.4f}")
+            
+        print("\nKline Data (last 5 rows):")
+        print(result['kline_data'].tail())
+        
+    else:
+        print("\nAPI Connection Failed!")
+        print(f"Balance Error: {result.get('balance_error', 'N/A')}")
+        print(f"Price Error: {result.get('price_error', 'N/A')}")
+        print(f"Live Ticker Error: {result.get('live_ticker_error', 'N/A')}")
+        print(f"Order Book Error: {result.get('order_book_error', 'N/A')}")
+        print(f"Kline Error: {result.get('kline_error', 'N/A')}")
+
     def check_open_positions(self):
-        """Überprüft, ob Positionen oder offene Orders für Spot vorhanden sind - FIXED VERSION"""
+        """Überprüft, ob Positionen geöffnet sind"""
         try:
-            # FIX: Korrigierter Endpoint für Spot Trading Orders
-            orders_result = self.make_request("GET", "/v5/order/realtime", "category=spot")
+            result = self.make_request("GET", "/v5/position/list", "category=linear")
             
-            if not orders_result['success']:
-                print(f"Order API Error: {orders_result.get('error', 'Unknown error')}")
-                # Alternative Methode versuchen - history orders
-                orders_result = self.make_request("GET", "/v5/order/history", "category=spot&limit=50")
-            
-            if orders_result['success'] and orders_result['data'].get('retCode') == 0:
-                orders = orders_result['data']['result']['list']
-                # Für Spot Trading betrachten wir offene Orders
-                open_orders = [order for order in orders if order.get('orderStatus', '') in ['New', 'PartiallyFilled', 'Active', 'Created']]
+            if result['success'] and result['data'].get('retCode') == 0:
+                positions = result['data']['result']['list']
+                open_positions = [pos for pos in positions if float(pos['size']) > 0]
                 
-                # Get account balance
-                balance_result = self.get_wallet_balance()
-                
-                if balance_result['success']:
-                    balances = balance_result['balances']
-                    
-                    # Combine orders and balance information
-                    # Für Spot Trading betrachten wir Assets, die nicht USDT sind, als "Positionen"
-                    non_usdt_assets = {k: v for k, v in balances.items() if k != 'USDT' and v > 0}
-                    
-                    positions = {
-                        'open_orders': open_orders,
-                        'balances': balances,
-                        'total_usdt': balance_result['total_usdt_value'],
-                        'non_usdt_assets': non_usdt_assets
-                    }
-                    
-                    # Wir haben eine Position, wenn entweder offene Orders oder non-USDT Assets existieren
-                    has_position = bool(open_orders) or bool(non_usdt_assets)
-                    
+                if open_positions:
                     return {
                         'success': True,
-                        'open_positions': has_position,
-                        'positions': positions
+                        'open_positions': True,
+                        'positions': open_positions
                     }
                 else:
-                    return {'success': False, 'error': f"Failed to fetch balance: {balance_result.get('error', 'Unknown error')}"}
+                    return {
+                        'success': True,
+                        'open_positions': False,
+                        'positions': []
+                    }
             else:
-                error_code = orders_result.get('data', {}).get('retCode', 'Unknown')
-                error_msg = orders_result.get('data', {}).get('retMsg', orders_result.get('error', 'Unknown error'))
-                return {'success': False, 'error': f"Failed to fetch orders: [{error_code}] {error_msg}"}
+                return {'success': False, 'error': 'Failed to fetch positions'}
             
         except Exception as e:
             return {'success': False, 'error': str(e)}
@@ -336,6 +360,9 @@ class LiveBybitAPI:
     def check_bot_status(self):
         """Überprüft den Status des Trading Bots"""
         try:
+            import os
+            import psutil
+            
             bot_status = {
                 'running': False,
                 'process_id': None,
@@ -414,9 +441,13 @@ class LiveBybitAPI:
                 'last_signal': None,
                 'error': str(e)
             }
-
+        
     def emergency_stop_bot(self):
         """Stoppt den Trading Bot im Notfall"""
+        import os
+        import psutil
+        import signal
+        
         result = {
             'success': False,
             'message': 'Kein aktiver Bot gefunden'
@@ -485,12 +516,19 @@ class LiveBybitAPI:
                     "timeInForce": "GoodTillCancel"
                 }
             
+            # Stop Loss / Take Profit als separate Orders
+            orders = []
+            
             # Hauptorder
             result = self.make_request("POST", "/v5/order/create", "", json_data=params)
+            orders.append(result)
             
             # Erfolgreich?
             if result['success'] and result['data'].get('retCode') == 0:
                 order_id = result['data']['result']['orderId']
+                
+                # Stop Loss für SPOT ist etwas komplexer - wir müssen OCO Orders oder separate Conditional Orders verwenden
+                # Hier implementieren wir einfache Limit Orders für TP und Market für SL
                 
                 # Für einfaches Stop-Loss bei Market Orders (Buy) müssen wir eine Sell Order platzieren
                 if stop_loss is not None and side == "Buy":
@@ -505,7 +543,8 @@ class LiveBybitAPI:
                             "timeInForce": "GoodTillCancel",
                             "orderLinkId": f"SL-{order_id}"
                         }
-                        self.make_request("POST", "/v5/order/create", "", json_data=sl_params)
+                        sl_result = self.make_request("POST", "/v5/order/create", "", json_data=sl_params)
+                        orders.append(sl_result)
                     except Exception as sl_error:
                         print(f"Stop-Loss Order Error: {str(sl_error)}")
                 
@@ -522,7 +561,8 @@ class LiveBybitAPI:
                             "timeInForce": "GoodTillCancel",
                             "orderLinkId": f"TP-{order_id}"
                         }
-                        self.make_request("POST", "/v5/order/create", "", json_data=tp_params)
+                        tp_result = self.make_request("POST", "/v5/order/create", "", json_data=tp_params)
+                        orders.append(tp_result)
                     except Exception as tp_error:
                         print(f"Take-Profit Order Error: {str(tp_error)}")
                 
@@ -530,6 +570,7 @@ class LiveBybitAPI:
                 return {
                     'success': True,
                     'order_id': order_id,
+                    'orders': orders,
                     'message': f"{side} Order für {quantity} {symbol} platziert"
                 }
             else:
@@ -539,6 +580,7 @@ class LiveBybitAPI:
                 error_msg = error_data.get('retMsg', 'Unknown error')
                 return {
                     'success': False,
+                    'orders': orders,
                     'error': f"Order fehlgeschlagen: [{error_code}] {error_msg}"
                 }
                 
@@ -548,129 +590,13 @@ class LiveBybitAPI:
                 'error': str(e)
             }
 
-    def get_dashboard_data(self):
-        """Kombinierte Daten für Dashboard"""
-        balance_data = self.get_wallet_balance()
-        price_data = self.get_btc_price()
-        live_ticker_data = self.get_live_ticker()
-        order_book_data = self.get_order_book()
-        position_data = self.check_open_positions()
-        
-        # Explizit Kline-Daten holen
-        kline_data = self.get_kline_data(symbol='BTCUSDT', interval='5', limit=100)
-        
-        # Bot Status prüfen (Dateipfad und Process ID)
-        bot_status = self.check_bot_status()
-        
-        # Erfolgreiche API-Verbindung prüfen
-        api_success = balance_data['success'] and price_data['success']
-        
-        if api_success:
-            # Auch wenn einige andere Daten fehlen, geben wir die Hauptdaten zurück
-            response = {
-                'portfolio_value': balance_data.get('total_usdt_value', 0),
-                'balances': balance_data.get('balances', {}),
-                'btc_price': price_data.get('price', 0),
-                'btc_change_24h': price_data.get('change_24h', 0),
-                'btc_high_24h': price_data.get('high_24h', 0),
-                'btc_low_24h': price_data.get('low_24h', 0),
-                'bot_status': bot_status,
-                'api_status': 'CONNECTED',
-                'account_type': 'TESTNET' if self.testnet else 'MAINNET',
-                'success': True
-            }
-            
-            # Kline-Daten hinzufügen
-            if kline_data.get('success', False):
-                response['kline_data'] = kline_data.get('data', None)
-            
-            # Zusätzliche Daten, falls verfügbar
-            if live_ticker_data.get('success', False):
-                response.update({
-                    'bid': live_ticker_data.get('bid', 0),
-                    'ask': live_ticker_data.get('ask', 0),
-                    'btc_volume_24h': live_ticker_data.get('volume_24h', 0),
-                })
-                
-            if order_book_data.get('success', False):
-                response.update({
-                    'order_book_bids': order_book_data.get('bids', []),
-                    'order_book_asks': order_book_data.get('asks', []),
-                })
-                
-            if position_data.get('success', False):
-                response.update({
-                    'open_positions': position_data.get('open_positions', False),
-                    'positions': position_data.get('positions', {}),
-                })
-                
-            return response
-            
-        else:
-            error_details = {
-                'balance_error': balance_data.get('error', 'N/A') if not balance_data.get('success', False) else 'None',
-                'price_error': price_data.get('error', 'N/A') if not price_data.get('success', False) else 'None',
-            }
-            print(f"Dashboard Data Fetch Error Details: {error_details}")
-            return {
-                'success': False,
-                'api_status': 'ERROR',
-                'error': f"Failed to fetch all dashboard data: {error_details}"
-            }
-
-
-# Test function
-def test_api():
-    """Testet die API-Verbindung"""
-    api = LiveBybitAPI()
-    
-    print("Testing Live Bybit API...")
-    print(f"API Base URL: {api.base_url}")
-    print(f"Testnet Mode: {api.testnet}")
-    
-    # Test Dashboard Data
-    result = api.get_dashboard_data()
-    
-    if result['success']:
-        print("\nAPI Connection Successful!")
-        print(f"Portfolio Value: ${result.get('portfolio_value', 0):.2f}")
-        print(f"BTC Price: ${result.get('btc_price', 0):,.2f}")
-        print(f"24h Change: {result.get('btc_change_24h', 0):+.2f}%")
-        print(f"Account: {result.get('account_type', 'Unknown')}")
-        
-        print("\nBalances:")
-        for coin, amount in result.get('balances', {}).items():
-            if coin == 'USDT':
-                print(f"   {coin}: {amount:.2f}")
-            else:
-                print(f"   {coin}: {amount:.6f}")
-        
-        if 'bid' in result and 'ask' in result:
-            print("\nLive Ticker Data:")
-            print(f"  Bid: {result.get('bid', 0):.2f}")
-            print(f"  Ask: {result.get('ask', 0):.2f}")
-        
-        if 'order_book_bids' in result:
-            print("\nOrder Book Bids (first 5):")
-            for bid in result.get('order_book_bids', [])[:5]:
-                print(f"  Price: {bid[0]:.2f}, Size: {bid[1]:.4f}")
-            
-        if 'order_book_asks' in result:
-            print("\nOrder Book Asks (first 5):")
-            for ask in result.get('order_book_asks', [])[:5]:
-                print(f"  Price: {ask[0]:.2f}, Size: {ask[1]:.4f}")
-            
-        if 'kline_data' in result and not result['kline_data'].empty:
-            print("\nKline Data (last 5 rows):")
-            print(result['kline_data'].tail())
-
-        if 'open_positions' in result:
-            print(f"\nOpen Positions: {result['open_positions']}")
-            
-    else:
-        print("\nAPI Connection Failed!")
-        print(f"Error: {result.get('error', 'Unknown error')}")
-
-
 if __name__ == "__main__":
-    test_api()
+    api = LiveBybitAPI()
+    print("Testing Live Bybit API...")
+    
+    # Balance testen
+    balance = api.get_wallet_balance()
+    if balance['success']:
+        print(f"Balance: {balance['balances']}")
+    else:
+        print(f"Balance Error: {balance.get('error')}")

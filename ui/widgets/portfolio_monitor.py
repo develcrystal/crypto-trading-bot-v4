@@ -94,19 +94,128 @@ def render_position_tracking(trading_active=False):
     """Render current position tracking"""
     st.markdown("#### 🎯 Position Status")
     
-    if trading_active:
+    # Get positions from session state
+    positions = st.session_state.get('positions', [])
+    
+    if positions and trading_active:
+        # Display the most recent position
+        position = positions[-1]
+        
         col1, col2, col3 = st.columns(3)
         
         with col1:
-            st.metric("Position", "LONG BTC", "$10.50 exposure")
+            position_type = position.get('type', 'UNKNOWN')
+            position_amount = position.get('amount', 0.0)
+            
+            st.metric(
+                "Position", 
+                f"{position_type} BTC", 
+                f"${position_amount:.2f} exposure"
+            )
         
         with col2:
-            st.metric("Entry Price", "$106,500.00", "Current position")
+            entry_price = position.get('entry_price', 0.0)
+            
+            # Get current price
+            current_price = 0.0
+            if 'live_data' in st.session_state and st.session_state.live_data.get('success'):
+                current_price = st.session_state.live_data.get('price', 0.0)
+            
+            st.metric(
+                "Entry Price", 
+                f"${entry_price:.2f}", 
+                f"Current: ${current_price:.2f}" if current_price > 0 else "Current position"
+            )
         
         with col3:
-            st.metric("Unrealized P&L", "+$0.50", "+0.47%")
+            # Calculate P&L
+            entry_price = position.get('entry_price', 0.0)
+            current_price = 0.0
+            position_type = position.get('type', 'UNKNOWN')
+            position_amount = position.get('amount', 0.0)
+            
+            if 'live_data' in st.session_state and st.session_state.live_data.get('success'):
+                current_price = st.session_state.live_data.get('price', 0.0)
+            
+            pnl = 0.0
+            pnl_pct = 0.0
+            
+            if entry_price > 0 and current_price > 0:
+                if position_type == 'LONG':
+                    price_change = current_price - entry_price
+                    pnl = (price_change / entry_price) * position_amount
+                    pnl_pct = (price_change / entry_price) * 100
+                elif position_type == 'SHORT':
+                    price_change = entry_price - current_price
+                    pnl = (price_change / entry_price) * position_amount
+                    pnl_pct = (price_change / entry_price) * 100
+            
+            st.metric(
+                "Unrealized P&L", 
+                f"{'+' if pnl >= 0 else ''}{pnl:.2f}$", 
+                f"{'+' if pnl_pct >= 0 else ''}{pnl_pct:.2f}%",
+                delta_color="normal" if pnl >= 0 else "inverse"
+            )
+            
+        # Show close position button
+        if st.button("🔄 Close Position"):
+            try:
+                # Import API client here to avoid circular imports
+                from core.api_client import BybitAPI
+                api = BybitAPI()
+                
+                # Execute the opposite order to close position
+                side = "Sell" if position_type == "LONG" else "Buy"
+                qty = position.get('quantity', 0.0)
+                
+                if qty > 0:
+                    order_result = api.place_order(
+                        symbol="BTCUSDT", 
+                        side=side, 
+                        order_type="Market", 
+                        qty=qty
+                    )
+                    
+                    if order_result.get('success'):
+                        st.success(f"✅ Position closed successfully")
+                        # Remove position from session state
+                        st.session_state.positions = positions[:-1]
+                        st.rerun()
+                    else:
+                        st.error(f"❌ Failed to close position: {order_result.get('error', 'Unknown error')}")
+                else:
+                    st.error("Invalid position quantity")
+            except Exception as e:
+                st.error(f"Error closing position: {str(e)}")
     else:
-        st.info("⚪ No active positions • Waiting for signal")
+        if trading_active:
+            st.info("⚪ No active positions • Waiting for signal or manual trade")
+        else:
+            st.warning("⚠️ Trading bot is paused • No position tracking")
+            
+        # Add a "Create Test Position" button for debugging
+        if st.button("🔧 Create Test Position"):
+            # Create a test position for debugging
+            if 'positions' not in st.session_state:
+                st.session_state.positions = []
+            
+            # Get current price
+            current_price = 106500.00  # Default
+            if 'live_data' in st.session_state and st.session_state.live_data.get('success'):
+                current_price = st.session_state.live_data.get('price', current_price)
+            
+            st.session_state.positions.append({
+                'type': 'LONG',
+                'symbol': 'BTCUSDT',
+                'entry_price': current_price,
+                'amount': 10.50,
+                'quantity': 10.50 / current_price,
+                'timestamp': datetime.now(),
+                'order_id': 'test_position'
+            })
+            
+            st.success("✅ Test position created")
+            st.rerun()
 
 
 def calculate_risk_metrics(portfolio_value, positions=None):

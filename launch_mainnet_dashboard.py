@@ -10,14 +10,19 @@ import time
 import subprocess
 from datetime import datetime
 
-# Pfade setzen
+# Set up Python path before any imports
 PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
+if PROJECT_DIR not in sys.path:
+    sys.path.insert(0, PROJECT_DIR)
+
+# Pfade setzen
 DASHBOARD_PATH = os.path.join(PROJECT_DIR, "ui", "main_dashboard.py")
 
 # Begrüßungsnachricht
 print("=" * 60)
 print("🚀 LAUNCHING ADVANCED LIVE TRADING DASHBOARD")
 print("=" * 60)
+print(f"📁 Project Directory: {PROJECT_DIR}")
 print(f"📁 Dashboard Path: {DASHBOARD_PATH}")
 
 # Prüfe, ob .env auf MAINNET eingestellt ist

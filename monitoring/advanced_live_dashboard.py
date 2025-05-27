@@ -505,12 +505,12 @@ def render_professional_chart():
                 )
             
             st.plotly_chart(fig, use_container_width=True)
-        else:
-            st.error("Failed to render the Smart Money Chart")
     else:
-        st.warning("No chart data available or error loading chart data.")
-        if 'error' in chart_data:
-            st.error(f"Error: {chart_data['error']}")
+        st.error("Failed to render the Smart Money Chart")
+else:
+    st.warning("No chart data available or error loading chart data.")
+    if 'error' in chart_data:
+        st.error(f"Error: {chart_data['error']}")
 
 def render_portfolio_monitor():
     """Render advanced portfolio monitoring with REAL $50.00 USDT"""

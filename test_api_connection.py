@@ -12,7 +12,7 @@ from datetime import datetime
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 # Import des API-Clients
-from core.api_client import BybitAPIClient
+from core.api_client import BybitAPI as BybitAPIClient
 
 # Konfiguriere Logging
 logging.basicConfig(

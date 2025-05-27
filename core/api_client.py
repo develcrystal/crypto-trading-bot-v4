@@ -23,7 +23,7 @@ load_dotenv()
 # Konfiguriere Logging
 logger = logging.getLogger(__name__)
 
-class BybitAPIClient:
+class BybitAPI:
     """
     Vereinheitlichte Bybit API-Integration für den Crypto Trading Bot.
     
@@ -62,7 +62,7 @@ class BybitAPIClient:
         # Standardwerte für API-Anfragen
         self.recv_window = 5000
             
-        logger.info(f"BybitAPIClient initialisiert. API Key: {self.api_key[:8] if self.api_key else 'MISSING'}...")
+        logger.info(f"BybitAPI initialisiert. API Key: {self.api_key[:8] if self.api_key else 'MISSING'}...")
         logger.info(f"Testnet: {self.testnet} | Base URL: {self.base_url}")
     
     def generate_signature(self, timestamp: str, payload: str) -> str:
@@ -441,6 +441,21 @@ class BybitAPIClient:
         
         return {'success': False, 'error': response.get('error', 'No open orders data')}
     
+    def get_trade_history(self) -> Dict:
+        """Fetch trade history from Bybit API"""
+        endpoint = "/v5/order/history"
+        params = {
+            'category': 'spot',
+            'limit': 100  # Maximum allowed by API
+        }
+        
+        response = self.make_request('GET', endpoint, params=params)
+        
+        if response['success']:
+            return response['data'].get('list', [])
+        
+        return []
+    
     # --- CONVENIENCE METHODS ---
     
     def get_dashboard_data(self) -> Dict:
@@ -481,7 +496,7 @@ def test_api_client():
     """
     Testet die API-Client Verbindung und Funktionen.
     """
-    api = BybitAPIClient()
+    api = BybitAPI()
     
     print("=" * 50)
     print("TESTING BYBIT API CLIENT")

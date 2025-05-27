@@ -19,7 +19,7 @@ sys.path.append(project_dir)
 load_dotenv()
 
 # Importiere API-Client
-from core.api_client import BybitAPIClient
+from core.api_client import BybitAPI as BybitAPIClient
 try:
     from monitoring.live_bybit_api import LiveBybitAPI
     LIVE_API_AVAILABLE = True

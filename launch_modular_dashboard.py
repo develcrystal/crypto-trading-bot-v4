@@ -9,7 +9,7 @@ Features:
 - Professional trading interface
 - Real-time data for MAINNET trading with $50 USDT
 """
-
+import BybitAPIClient
 import streamlit as st
 import subprocess
 import sys

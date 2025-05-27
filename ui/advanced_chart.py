@@ -19,7 +19,7 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Import der API-Client Klasse aus dem Core-Modul
-from core.api_client import BybitAPIClient
+from core.api_client import BybitAPI
 
 class SmartMoneyChart:
     """

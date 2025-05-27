@@ -1,7 +1,7 @@
 class Config:
     # Bybit API Configuration
-    BYBIT_API_KEY = "YOUR_BYBIT_API_KEY"
-    BYBIT_API_SECRET = "YOUR_BYBIT_API_SECRET"
+    BYBIT_API_KEY = "8oOSGgMwmw0Jp5P9at"
+    BYBIT_API_SECRET = "C6KoXzH7IzyXehoADScSkzk686ekobeNBfsU"
     
     # Trading Parameters
     SYMBOL = "BTCUSDT"
