@@ -99,6 +99,44 @@
 
 .widget-container:hover {
     transform: translateY(-2px);
+}
+
+/* Trading Activity Panel */
+.trading-activity-panel {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 15px;
+    margin: 15px 0;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    overflow: hidden;
+}
+
+.trade-entry {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid #e2e8f0;
+    transition: all 0.2s ease;
+}
+
+.trade-entry:last-child {
+    border-bottom: none;
+}
+
+.trade-entry:hover {
+    background: #f1f5f9;
+}
+
+.profit-highlight {
+    color: #10b981;
+    font-weight: 600;
+}
+
+.loss-highlight {
+    color: #ef4444;
+    font-weight: 600;
     box-shadow: 0 8px 30px rgba(0,0,0,0.1);
 }
 

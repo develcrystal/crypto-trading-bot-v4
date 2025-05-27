@@ -31,6 +31,11 @@ class LiveBybitAPI:
             self.base_url = "https://api.bybit.com"
         
         self.recv_window = str(5000)
+        self.log_patterns = {
+            'signal': r'\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\] SIGNAL: (BUY|SELL) at (\d+\.\d+) USDT',
+            'trade': r'\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\] TRADE: (BUY|SELL) executed at (\d+\.\d+) USDT, P&L: (-?\d+\.\d+) USDT',
+            'order': r'\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\] ORDER: (BUY|SELL) order placed at (\d+\.\d+) USDT, size: (\d+\.\d+) BTC'
+        }
     
     def generate_signature(self, timestamp, payload):
         """Generiert Bybit V5 Signature"""
@@ -122,6 +127,74 @@ class LiveBybitAPI:
             
         except Exception as e:
             return {'success': False, 'error': str(e)}
+
+    def parse_log_file(self, log_path):
+        """Parses trading logs for signals and trades"""
+        signals = []
+        trades = []
+        
+        try:
+            with open(log_path, 'r') as f:
+                lines = f.readlines()
+                
+                for line in lines:
+                    # Parse signals
+                    signal_match = re.search(self.log_patterns['signal'], line)
+                    if signal_match:
+                        timestamp, signal_type, price = signal_match.groups()
+                        signals.append({
+                            'timestamp': datetime.strptime(timestamp, '%Y-%m-%d %H:%M:%S'),
+                            'type': signal_type,
+                            'price': float(price),
+                            'status': 'OPEN'
+                        })
+                    
+                    # Parse trades
+                    trade_match = re.search(self.log_patterns['trade'], line)
+                    if trade_match:
+                        timestamp, side, price, pnl = trade_match.groups()
+                        trades.append({
+                            'entry_time': datetime.strptime(timestamp, '%Y-%m-%d %H:%M:%S'),
+                            'side': side,
+                            'entry_price': float(price),
+                            'pnl': float(pnl),
+                            'status': 'CLOSED'
+                        })
+                    
+                    # Parse orders
+                    order_match = re.search(self.log_patterns['order'], line)
+                    if order_match:
+                        timestamp, side, price, size = order_match.groups()
+                        # Store order information if needed
+                        pass
+                
+        except Exception as e:
+            print(f"Error parsing log file: {str(e)}")
+            
+        return {'signals': signals, 'trades': trades}
+
+    def get_dashboard_data(self):
+        """Holt alle notwendigen Dashboard-Daten"""
+        data = {}
+        
+        # Get balance
+        balance_data = self.get_wallet_balance()
+        if balance_data['success']:
+            data.update(balance_data)
+            
+        # Get BTC price
+        btc_data = self.get_btc_price()
+        if btc_data['success']:
+            data.update(btc_data)
+            
+        # Parse logs
+        try:
+            log_data = self.parse_log_file('trading.log')
+            data.update(log_data)
+        except Exception as e:
+            print(f"Error getting log data: {str(e)}")
+            
+        return data
     
     def get_btc_price(self):
         """Holt aktuellen BTC Preis"""
