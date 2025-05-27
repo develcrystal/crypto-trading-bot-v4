@@ -16,6 +16,58 @@
 - 🧠 **Market Regime Detection**: Bull/Bear/Sideways automatische Erkennung
 - ⚡ **Auto-Start System**: Vollautomatische 8-Stunden Trading Sessions
 
+## 🚀 Startkonfiguration & Prozessübersicht
+
+### Wichtige Dateien & deren Funktionen:
+
+```
+crypto-bot_V2/
+├── 📁 .env                     # Konfiguration & API-Keys
+├── 🚀 launch_mainnet_dashboard.py  # Startet das Haupt-Dashboard
+├── 📁 ui/                       # Benutzeroberfläche
+│   ├── main_dashboard.py       # Haupt-Dashboard Logik
+│   └── components/             # UI-Komponenten
+│       └── real_balance.py     # Anzeige der Kontostände
+├── 📁 core/                     # Kernfunktionalität
+│   └── api_client.py           # Bybit API Integration (als BybitAPI)
+└── 📁 monitoring/              # Überwachung & Logging
+```
+
+### Startprozess:
+
+1. **Initialisierung**:
+   ```bash
+   python launch_mainnet_dashboard.py
+   ```
+   - Lädt Konfiguration aus `.env`
+   - Initialisiert die API-Verbindung zu Bybit
+   - Startet das Streamlit Dashboard
+
+2. **Dashboard Start**:
+   ```
+   ============================================================
+   🚀 LAUNCHING ADVANCED LIVE TRADING DASHBOARD
+   ============================================================
+   📁 Project Directory: /path/to/crypto-bot_V2
+   📁 Dashboard Path: /path/to/crypto-bot_V2/ui/main_dashboard.py
+   🔴 MAINNET MODE - REAL $50.00 USDT!
+   ```
+
+3. **Zugriff auf das Dashboard**:
+   - Lokal: http://localhost:8505
+   - Netzwerk: http://[Ihre-IP]:8505
+
+### Wichtige Hinweise:
+- Die API-Keys in `.env` müssen gültig und aktiv sein
+- Das Dashboard benötigt eine stabile Internetverbindung
+- Bei Verbindungsproblemen wird automatisch ein Reconnect versucht
+- Alle Trades werden im Logfile protokolliert
+
+### Fehlerbehebung:
+- Bei Verbindungsabbrüchen startet sich das System automatisch neu
+- API-Fehler werden im Dashboard und in der Log-Datei protokolliert
+- Bei kritischen Fehlern wird der Handelsmodus automatisch deaktiviert
+
 ---
 
 ## 📋 Übersicht

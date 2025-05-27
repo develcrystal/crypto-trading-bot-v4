@@ -8,6 +8,7 @@ import streamlit as st
 import pandas as pd
 from datetime import datetime, timedelta
 import numpy as np
+from core.api_client import BybitAPI
 
 
 def render_trade_history(session_state, trade_data=None):
@@ -21,13 +22,14 @@ def render_trade_history(session_state, trade_data=None):
     st.markdown("### 📋 TRADE HISTORY")
     
     # Initialize dummy data if not provided
+    # Initialize real trade data if not provided
     if trade_data is None:
         # Check if we have trade data in the session state
         if 'trade_history' not in session_state:
-            session_state.trade_history = create_sample_trade_history()
+            # Fetch real trade data from API or database
+            session_state.trade_history = fetch_trade_history_from_api()
         
         trade_data = session_state.trade_history
-    
     # Filters for trade history
     col1, col2, col3, col4 = st.columns(4)
     
@@ -99,31 +101,35 @@ def render_trade_history(session_state, trade_data=None):
     filtered_data = filtered_data[pd.to_numeric(filtered_data['PnL'], errors='coerce').fillna(0) >= min_profit]
     # Render the trade table
     if not filtered_data.empty:
-        # Format the dataframe for display
-        display_df = filtered_data.copy()
-        
-        # Format Time column
-        display_df['Time'] = display_df['Time'].dt.strftime('%Y-%m-%d %H:%M')
-        
-        # Format numeric columns
-        display_df['Entry'] = display_df['Entry'].map('${:,.2f}'.format)
-        display_df['Exit'] = display_df['Exit'].map(lambda x: '${:,.2f}'.format(x) if pd.notna(x) else 'Open')
-        display_df['PnL'] = display_df['PnL'].map(lambda x: '${:+,.2f}'.format(x) if pd.notna(x) else '-')
-        
-        # Color code based on PnL or Status
-        def highlight_trades(row):
-            if row['Status'] == 'Open':
-                return ['background-color: #374151'] * len(row)
-            elif row['PnL'] > 0:
-                return ['background-color: rgba(5, 150, 105, 0.2)'] * len(row)
-            elif row['PnL'] < 0:
-                return ['background-color: rgba(220, 38, 38, 0.2)'] * len(row)
-            return [''] * len(row)
-        
-        # Apply styling and display
-        styled_df = display_df.style.apply(highlight_trades, axis=1)
-        st.dataframe(styled_df, use_container_width=True)
-        
+        if not filtered_data.empty:
+            # Ensure PnL is numeric for calculations
+            filtered_data['PnL'] = pd.to_numeric(filtered_data['PnL'], errors='coerce').fillna(0)
+            
+            # Format the dataframe for display
+            display_df = filtered_data.copy()
+            
+            # Format Time column
+            display_df['Time'] = display_df['Time'].dt.strftime('%Y-%m-%d %H:%M')
+            
+            # Format numeric columns AFTER filtering
+            display_df['Entry'] = display_df['Entry'].map('${:,.2f}'.format)
+            display_df['Exit'] = display_df['Exit'].map(lambda x: '${:,.2f}'.format(x) if pd.notna(x) else 'Open')
+            display_df['PnL'] = display_df['PnL'].map(lambda x: '${:+,.2f}'.format(x))
+            
+            # Color code based on PnL or Status
+            def highlight_trades(row):
+                pnl_value = row['PnL'].replace('$', '').replace(',', '')
+                if row['Status'] == 'Open':
+                    return ['background-color: #374151'] * len(row)
+                elif float(pnl_value) > 0:
+                    return ['background-color: rgba(5, 150, 105, 0.2)'] * len(row)
+                elif float(pnl_value) < 0:
+                    return ['background-color: rgba(220, 38, 38, 0.2)'] * len(row)
+                return [''] * len(row)
+            
+            # Apply styling and display
+            styled_df = display_df.style.apply(highlight_trades, axis=1)
+            st.dataframe(styled_df, use_container_width=True)
         # Trade statistics
         st.markdown("#### 📊 Trading Statistics")
         
@@ -164,74 +170,40 @@ def render_trade_history(session_state, trade_data=None):
     else:
         st.info("No trades match the selected filters.")
 
-
-def create_sample_trade_history():
-    """Create sample trade history data for testing"""
-    # Current time
-    now = datetime.now()
+def fetch_trade_history_from_api():
+    """Fetch real trade history data from API"""
+    try:
+        # Initialize API client
+        api_client = BybitAPI()
+        
+        # Fetch trade history
+        trade_history = api_client.get_trade_history()
+        
+        if not trade_history:
+            return pd.DataFrame(columns=['ID', 'Time', 'Side', 'Symbol', 'Size', 'Entry', 'Exit', 'PnL', 'Status', 'Regime'])
+        
+        # Convert to DataFrame
+        df = pd.DataFrame(trade_history)
+        
+        # Ensure required columns exist
+        required_columns = ['ID', 'Time', 'Side', 'Symbol', 'Size', 'Entry', 'Exit', 'PnL', 'Status', 'Regime']
+        for column in required_columns:
+            if column not in df.columns:
+                df[column] = None
+        
+        # Convert Time column to datetime if it exists and is not already datetime
+        if 'Time' in df.columns and not pd.api.types.is_datetime64_any_dtype(df['Time']):
+            try:
+                df['Time'] = pd.to_datetime(df['Time'])
+            except (ValueError, TypeError):
+                # If conversion fails, set to current time
+                df['Time'] = pd.Timestamp.now()
+        
+        return df
     
-    # Sample data
-    data = {
-        'ID': range(1, 11),
-        'Time': [
-            now - timedelta(hours=1),
-            now - timedelta(hours=3),
-            now - timedelta(hours=6),
-            now - timedelta(hours=12),
-            now - timedelta(days=1),
-            now - timedelta(days=1, hours=6),
-            now - timedelta(days=2),
-            now - timedelta(days=3),
-            now - timedelta(days=4),
-            now - timedelta(days=5),
-        ],
-        'Side': ['Buy', 'Sell', 'Buy', 'Sell', 'Buy', 'Buy', 'Sell', 'Buy', 'Sell', 'Buy'],
-        'Symbol': ['BTCUSDT'] * 10,
-        'Size': [0.0001, 0.0002, 0.0001, 0.0001, 0.0002, 0.0001, 0.0001, 0.0002, 0.0001, 0.0001],
-        'Entry': [
-            106500.00,
-            106800.00,
-            106200.00,
-            105900.00,
-            107100.00,
-            107400.00,
-            107800.00,
-            108200.00,
-            108500.00,
-            108900.00
-        ],
-        'Exit': [
-            106700.00,
-            106600.00,
-            106400.00,
-            105700.00,
-            107300.00,
-            107200.00,
-            107600.00,
-            None,
-            None,
-            None
-        ],
-        'PnL': [
-            0.20,
-            0.40,
-            0.20,
-            -0.20,
-            0.40,
-            -0.20,
-            -0.20,
-            None,
-            None,
-            None
-        ],
-        'Status': ['Closed', 'Closed', 'Closed', 'Closed', 'Closed', 'Closed', 'Closed', 'Open', 'Open', 'Open'],
-        'Regime': ['Bull', 'Bull', 'Bull', 'Sideways', 'Bull', 'Bull', 'Bear', 'Bull', 'Bull', 'Bull']
-    }
-    
-    # Create DataFrame
-    df = pd.DataFrame(data)
-    
-    return df
+    except Exception as e:
+        st.error(f"Failed to fetch trade history: {str(e)}")
+        return pd.DataFrame(columns=['ID', 'Time', 'Side', 'Symbol', 'Size', 'Entry', 'Exit', 'PnL', 'Status', 'Regime'])
 
 
 def get_trade_history_styles():

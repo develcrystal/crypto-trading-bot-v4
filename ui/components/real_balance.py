@@ -73,24 +73,25 @@ def render_real_balances():
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
-        portfolio_value = real_balance['portfolio_value']
+        portfolio_value = real_balance.get('portfolio_value', 0) or 0
+        account_type = real_balance.get('account_type', 'MAINNET') or 'MAINNET'
         st.metric(
             "REAL USDT Balance", 
-            f"${portfolio_value:.2f}",
-            f"LIVE {real_balance.get('account_type', 'MAINNET')}"
+            f"${float(portfolio_value):.2f}",
+            f"LIVE {account_type}"
         )
     
     with col2:
-        btc_balance = real_balance['balances'].get('BTC', 0)
-        btc_price = real_balance.get('btc_price', 0)
+        btc_balance = float(real_balance.get('balances', {}).get('BTC', 0) or 0)
+        btc_price = float(real_balance.get('btc_price', 0) or 0)
         st.metric(
             "BTC Balance",
             f"{btc_balance:.8f} BTC",
-            f"@ ${btc_price:.2f}"
+            f"@ ${btc_price:.2f}" if btc_price > 0 else "-"
         )
     
     with col3:
-        usdt_balance = real_balance['balances'].get('USDT', 0)
+        usdt_balance = float(real_balance.get('balances', {}).get('USDT', 0) or 0)
         st.metric(
             "USDT Balance",
             f"${usdt_balance:.2f}",
@@ -98,9 +99,16 @@ def render_real_balances():
         )
     
     with col4:
-        change = (portfolio_value - 50) / 50 * 100 if real_balance.get('force_real') else 0
-        st.metric(
-            "Portfolio Change",
-            f"${portfolio_value - 50:.2f}",
-            f"{change:.1f}%"
-        )
+        try:
+            change = ((float(portfolio_value) - 50) / 50 * 100) if real_balance.get('force_real') else 0
+            st.metric(
+                "Portfolio Change",
+                f"${float(portfolio_value) - 50:.2f}",
+                f"{float(change):.1f}%"
+            )
+        except (TypeError, ValueError):
+            st.metric(
+                "Portfolio Change",
+                "$0.00",
+                "0.0%"
+            )
