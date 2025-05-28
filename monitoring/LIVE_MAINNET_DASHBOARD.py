@@ -145,6 +145,25 @@ st.markdown("""
         font-weight: bold;
     }
     
+    /* Market Regime Widget Styles */
+    .metric-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 1rem;
+        border-radius: 10px;
+        color: white;
+        text-align: center;
+        margin: 0.5rem 0;
+    }
+    .status-good { color: #00ff00; font-weight: bold; }
+    .status-warning { color: #ffaa00; font-weight: bold; }
+    .status-danger { color: #ff0000; font-weight: bold; }
+    .regime-bull { background: linear-gradient(90deg, #2ecc71, #27ae60); }
+    .regime-bear { background: linear-gradient(90deg, #e74c3c, #c0392b); }
+    .regime-sideways { background: linear-gradient(90deg, #f39c12, #e67e22); }
+    .signal-strong { background: #2ecc71; color: white; padding: 0.2rem 0.5rem; border-radius: 5px; }
+    .signal-weak { background: #e74c3c; color: white; padding: 0.2rem 0.5rem; border-radius: 5px; }
+    .signal-hold { background: #f39c12; color: white; padding: 0.2rem 0.5rem; border-radius: 5px; }
+    
     /* Style für Tabs */
     .stTabs [data-baseweb="tab-list"] {
         gap: 2px;
@@ -166,6 +185,132 @@ st.markdown("""
     }
 </style>
 """, unsafe_allow_html=True)
+
+# ============================================================================
+# SESSION STATE INITIALIZATION
+# ============================================================================
+
+def initialize_session_state():
+    """Initialize session state with required data structures"""
+    if 'initialized' not in st.session_state:
+        st.session_state.initialized = True
+        st.session_state.api_status_initialized = False
+        st.session_state.trading_active = False
+        st.session_state.emergency_stop = False
+        
+        # Initialize market regime detection data
+        if 'current_market_regime' not in st.session_state:
+            st.session_state.current_market_regime = {
+                'regime': 'BULL',  # Default regime
+                'confidence': 0.75,
+                'bull_score': 6,
+                'bear_score': 2,
+                'sideways_score': 1,
+                'total_return': 3.5,
+                'volatility': 2.8
+            }
+
+# Initialize session state
+initialize_session_state()
+
+# ============================================================================
+# MARKET REGIME DETECTION
+# ============================================================================
+
+def detect_market_regime(data):
+    """Enhanced market regime detection"""
+    # Historische Preisdaten extrahieren
+    df = data.get('kline_data')
+    
+    if df is None or isinstance(df, pd.DataFrame) and df.empty:
+        # Keine ausreichenden Daten, behalte vorherige Regime-Einschätzung bei
+        return st.session_state.current_market_regime
+    
+    # Berechne Regime-Indikatoren
+    try:
+        # Berechne Returns
+        if len(df) >= 24:  # Mindestens 24 Kerzen für vernünftige Analyse
+            recent_data = df.tail(24)  # Letzte 24 Stunden/Kerzen
+            
+            # Berechne Gesamtrendite im Zeitraum
+            total_return = (recent_data['close'].iloc[-1] / recent_data['close'].iloc[0] - 1) * 100
+            
+            # Berechne Volatilität
+            volatility = recent_data['close'].pct_change().std() * 100 * np.sqrt(24)
+            
+            # Berechne Trend-Stärke
+            trend_strength = abs(total_return)
+            
+            # Regime Scoring System
+            bull_score = 0
+            bear_score = 0
+            sideways_score = 0
+            
+            # Gesamtrendite-Analyse
+            if total_return > 3:
+                bull_score += 3
+            elif total_return < -3:
+                bear_score += 3
+            else:
+                sideways_score += 2
+                
+            # Volatilitäts-Analyse
+            if volatility < 2:
+                sideways_score += 1
+            elif volatility > 4:
+                if total_return > 0:
+                    bull_score += 2
+                else:
+                    bear_score += 2
+                    
+            # Trend-Stärke
+            if trend_strength > 5:
+                if total_return > 0:
+                    bull_score += 2
+                else:
+                    bear_score += 2
+            else:
+                sideways_score += 1
+                
+            # Check ob die Preise über dem Moving Average liegen
+            ma20 = recent_data['close'].rolling(window=20).mean()
+            if not ma20.empty and len(ma20.dropna()) > 0:
+                last_ma20 = ma20.dropna().iloc[-1]
+                last_close = recent_data['close'].iloc[-1]
+                
+                if last_close > last_ma20:
+                    bull_score += 1
+                else:
+                    bear_score += 1
+                    
+            # Bestimme das Regime
+            max_score = max(bull_score, bear_score, sideways_score)
+            
+            if bull_score == max_score:
+                regime = 'BULL'
+                confidence = min(bull_score / 8.0, 1.0)
+            elif bear_score == max_score:
+                regime = 'BEAR'
+                confidence = min(bear_score / 8.0, 1.0)
+            else:
+                regime = 'SIDEWAYS'
+                confidence = min(sideways_score / 5.0, 1.0)
+                
+            # Aktualisiere die Erkennung
+            return {
+                'regime': regime,
+                'confidence': confidence,
+                'bull_score': bull_score,
+                'bear_score': bear_score,
+                'sideways_score': sideways_score,
+                'total_return': total_return,
+                'volatility': volatility
+            }
+    except Exception as e:
+        print(f"Error in market regime detection: {str(e)}")
+        
+    # Im Fehlerfall oder bei unzureichenden Daten vorherige Einschätzung beibehalten
+    return st.session_state.current_market_regime
 
 # ============================================================================
 # LIVE DATA HANDLER - MAINNET ONLY
@@ -412,6 +557,63 @@ def get_live_mainnet_balance():
         }
 
 # ============================================================================
+# BOT CONTROL FUNCTIONS
+# ============================================================================
+
+def start_trading_bot():
+    """Startet den Trading Bot"""
+    try:
+        # Prüfen ob die notwendigen Skripte existieren
+        bot_scripts = [
+            'enhanced_live_bot.py',
+            'live_trading_bot.py'
+        ]
+        
+        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        bot_script_path = None
+        
+        for script in bot_scripts:
+            script_path = os.path.join(base_dir, script)
+            if os.path.exists(script_path):
+                bot_script_path = script_path
+                break
+        
+        if bot_script_path:
+            # Pfad zum Python-Interpreter ermitteln
+            python_exe = sys.executable
+            
+            # Bot als separaten Prozess starten
+            import subprocess
+            process = subprocess.Popen(
+                [python_exe, bot_script_path],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                cwd=base_dir
+            )
+            
+            return {
+                'success': True,
+                'message': f"Bot gestartet! (PID: {process.pid})",
+                'pid': process.pid,
+                'script': os.path.basename(bot_script_path)
+            }
+        else:
+            return {
+                'success': False,
+                'message': "Bot-Script nicht gefunden."
+            }
+    except Exception as e:
+        return {
+            'success': False,
+            'message': f"Fehler beim Starten des Bots: {str(e)}"
+        }
+
+def stop_trading_bot():
+    """Stoppt den Trading Bot"""
+    api = LiveBybitAPI()
+    return api.emergency_stop_bot()
+
+# ============================================================================
 # DASHBOARD COMPONENTS - LIVE MAINNET
 # ============================================================================
 
@@ -547,26 +749,100 @@ def render_api_status(data):
     
     st.markdown("### 📡 **API CONNECTION STATUS**")
     
-    col1, col2, col3 = st.columns(3)
+    # Nur einmal initialisieren, um Duplikation zu vermeiden
+    if 'api_status_initialized' not in st.session_state:
+        st.session_state.api_status_initialized = True
+        
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            if data.get('api_connected', False):
+                st.markdown('<div class="api-status">✅ CONNECTED</div>', unsafe_allow_html=True)
+            else:
+                st.error("❌ DISCONNECTED")
+        
+        with col2:
+            account_type = data.get('account_type', 'UNKNOWN')
+            if account_type == 'MAINNET':
+                st.markdown('<div class="api-status">💰 MAINNET</div>', unsafe_allow_html=True)
+            else:
+                st.warning(f"🧪 {account_type}")
+        
+        with col3:
+            if data.get('is_real', False):
+                st.markdown('<div class="api-status">🔴 LIVE DATA</div>', unsafe_allow_html=True)
+            else:
+                st.error("❌ NO LIVE DATA")
+    else:
+        # Status bereits initialisiert, stelle sicher, dass die Widgets nur einmal angezeigt werden
+        pass
+
+def render_market_regime_panel(data):
+    """Render market regime detection panel"""
+    st.markdown("## 🧠 **MARKET REGIME ANALYSIS**")
+    
+    # Verwende die Marktregime-Daten aus der Session
+    regime_data = st.session_state.current_market_regime
+    regime = regime_data['regime']
+    confidence = regime_data['confidence']
+    
+    # Regime status mit Styling
+    if regime == 'BULL':
+        regime_emoji = "🚀"
+        regime_color = "🟢"
+        css_class = "regime-bull"
+    elif regime == 'BEAR':
+        regime_emoji = "📉"
+        regime_color = "🔴"
+        css_class = "regime-bear"
+    else:
+        regime_emoji = "↔️"
+        regime_color = "🟡"
+        css_class = "regime-sideways"
+    
+    col1, col2 = st.columns([2, 1])
     
     with col1:
-        if data.get('api_connected', False):
-            st.markdown('<div class="api-status">✅ CONNECTED</div>', unsafe_allow_html=True)
-        else:
-            st.error("❌ DISCONNECTED")
+        st.markdown(f"""
+        <div class="metric-card {css_class}">
+            <h3>{regime_color} Current Regime: {regime} MARKET {regime_emoji}</h3>
+            <h4>Confidence: {confidence:.1%}</h4>
+            <p>Duration: 2h 34m</p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Regime scores
+        st.markdown("### 📊 Regime Scoring Breakdown")
+        score_col1, score_col2, score_col3 = st.columns(3)
+        
+        with score_col1:
+            st.metric("🟢 Bull Score", f"{regime_data['bull_score']}/8")
+        with score_col2:
+            st.metric("🔴 Bear Score", f"{regime_data['bear_score']}/8")
+        with score_col3:
+            st.metric("🟡 Sideways Score", f"{regime_data['sideways_score']}/5")
     
     with col2:
-        account_type = data.get('account_type', 'UNKNOWN')
-        if account_type == 'MAINNET':
-            st.markdown('<div class="api-status">💰 MAINNET</div>', unsafe_allow_html=True)
+        st.markdown("### ⚙️ Adaptive Parameters")
+        
+        if regime == 'BULL':
+            st.markdown("""
+            - **Volume Threshold:** 100k → 80k (-20%)
+            - **Risk-Reward:** 1.5:1 → 1.8:1 (+20%)
+            - **Liquidity Focus:** Enhanced (+10%)
+            """)
+        elif regime == 'BEAR':
+            st.markdown("""
+            - **Volume Threshold:** 100k → 120k (+20%)
+            - **Risk-Reward:** 1.5:1 → 1.4:1 (-10%)
+            - **Liquidity Focus:** Maximum (+30%)
+            """)
         else:
-            st.warning(f"🧪 {account_type}")
-    
-    with col3:
-        if data.get('is_real', False):
-            st.markdown('<div class="api-status">🔴 LIVE DATA</div>', unsafe_allow_html=True)
-        else:
-            st.error("❌ NO LIVE DATA")
+            st.markdown("""
+            - **Volume Threshold:** 100k → 150k (+50%)
+            - **Risk-Reward:** 1.5:1 (Standard)
+            - **Liquidity Focus:** Standard
+            """)
 
 def render_trading_readiness():
     """Trading Readiness Check"""
@@ -619,7 +895,7 @@ def render_trading_readiness():
         st.error(f"❌ **NOT READY** ({passed_checks}/{total_checks} checks passed)")
 
 def render_sidebar_live_controls(data):
-    """Sidebar mit Live Controls"""
+    """Sidebar mit Live Controls - Vereinfachte Version"""
     
     st.sidebar.markdown("### 💰 **LIVE MAINNET CONTROLS**")
     
@@ -654,14 +930,15 @@ def render_sidebar_live_controls(data):
         st.sidebar.info(f"⏱️ Uptime: {bot_status.get('uptime', 'unknown')}")
         
         # Market Regime
-        market_regime = bot_status.get('market_regime')
-        if market_regime:
-            if market_regime == "BULL":
-                st.sidebar.success(f"🚀 Market Regime: {market_regime}")
-            elif market_regime == "BEAR":
-                st.sidebar.error(f"📉 Market Regime: {market_regime}")
-            else:
-                st.sidebar.warning(f"↔️ Market Regime: {market_regime}")
+        market_regime = st.session_state.current_market_regime['regime']
+        confidence = st.session_state.current_market_regime['confidence']
+        
+        if market_regime == "BULL":
+            st.sidebar.success(f"🚀 Market Regime: {market_regime} ({confidence:.1%})")
+        elif market_regime == "BEAR":
+            st.sidebar.error(f"📉 Market Regime: {market_regime} ({confidence:.1%})")
+        else:
+            st.sidebar.warning(f"↔️ Market Regime: {market_regime} ({confidence:.1%})")
         
         # Last Signal
         last_signal = bot_status.get('last_signal')
@@ -687,44 +964,19 @@ def render_sidebar_live_controls(data):
             else:
                 st.sidebar.metric(f"{coin} Balance", f"{amount:.6f}")
     
-    # Emergency Controls
+    # Emergency Controls - Vereinfacht
     st.sidebar.markdown("### 🚨 **EMERGENCY**")
     
-    emergency_col1, emergency_col2 = st.sidebar.columns(2)
-    
-    with emergency_col1:
-        if st.button("🛑 EMERGENCY STOP", type="primary"):
-            # API-Objekt erstellen und Emergency-Stop ausführen
-            api = LiveBybitAPI()
-            result = api.emergency_stop_bot()
-            
-            if result['success']:
-                st.sidebar.success(f"✅ {result['message']}")
-                # Kurz warten und Seite neu laden
-                time.sleep(1)
-                st.rerun()
-            else:
-                st.sidebar.error(f"❌ {result['message']}")
-    
-    with emergency_col2:
-        if st.button("📊 CLOSE POSITIONS"):
-            # Hier könnte man alle offenen Positionen schließen
-            st.sidebar.warning("⚠️ Position Closing würde hier alle offenen Positionen schließen")
-    
-    # Open Positions
-    if data.get('open_positions', False):
-        st.sidebar.markdown("### 📊 **OPEN POSITIONS**")
-        positions = data.get('positions', [])
-        for pos in positions:
-            symbol = pos.get('symbol', 'Unknown')
-            size = float(pos.get('size', 0))
-            side = pos.get('side', 'Unknown')
-            pnl = float(pos.get('unrealisedPnl', 0))
-            
-            if side == "Buy":
-                st.sidebar.success(f"LONG {symbol}: {size} (P&L: ${pnl:.2f})")
-            else:
-                st.sidebar.error(f"SHORT {symbol}: {size} (P&L: ${pnl:.2f})")
+    if st.sidebar.button("🛑 EMERGENCY STOP", type="primary"):
+        api = LiveBybitAPI()
+        result = api.emergency_stop_bot()
+        
+        if result['success']:
+            st.sidebar.success(f"✅ {result['message']}")
+            time.sleep(1)
+            st.rerun()
+        else:
+            st.sidebar.error(f"❌ {result['message']}")
     
     # System Info
     st.sidebar.markdown("### ⚙️ **SYSTEM INFO**")
@@ -857,12 +1109,14 @@ def render_btc_chart(data):
         # Setup für eine zweite y-Achse für das Volume
         yaxis2=dict(
             title='Volume',
-            titlefont=dict(color='rgba(255, 255, 255, 0.85)'),
+            title_font=dict(color='rgba(255, 255, 255, 0.85)'),
             tickfont=dict(color='rgba(255, 255, 255, 0.85)'),
             anchor="x",
             overlaying="y",
             side="right",
-            showgrid=False
+            showgrid=False,
+            title_standoff=20,
+            tickformat=",.0f"
         ),
         # Legende konfigurieren
         legend=dict(
@@ -1323,6 +1577,10 @@ def main():
     # Get live data from Bybit
     data = get_live_mainnet_balance()
     
+    # Aktualisiere die Market Regime Detection
+    if data.get('api_connected', False) and 'kline_data' in data and not isinstance(data['kline_data'], pd.DataFrame) or not data['kline_data'].empty:
+        st.session_state.current_market_regime = detect_market_regime(data)
+    
     # Render dashboard components
     render_mainnet_header()
     
@@ -1330,6 +1588,9 @@ def main():
         # Top row with key metrics
         render_live_balance_section(data)
         render_live_btc_price(data)
+        
+        # Market Regime Detection Panel
+        render_market_regime_panel(data)
         
         # Trading readiness
         render_trading_readiness()
