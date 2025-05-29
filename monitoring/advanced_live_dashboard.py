@@ -1,57 +1,20 @@
-#!/usr/bin/env python3
-"""
-🚀 ADVANCED LIVE TRADING DASHBOARD - MIT ECHTEN $50.00 USDT!
-Professional Real-time Dashboard für Enhanced Smart Money Bot
-Version: 2.1 - LIVE MAINNET mit ECHTEN DATEN!
-"""
-
 import streamlit as st
 import pandas as pd
-import numpy as np
 import plotly.graph_objects as go
-import plotly.express as px
-from plotly.subplots import make_subplots
-import requests
-import json
+from datetime import datetime
 import time
-import hmac
-import hashlib
-from datetime import datetime, timedelta
-import os
-import sys # Import sys
-from dotenv import load_dotenv
-import sqlite3
-from pathlib import Path
 
-# Add root directory to Python path for module imports
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-# Import corrected APIs
-from exchange.bybit_api import BybitAPI
-try:
-    from corrected_live_api import LiveBybitAPI
-except ImportError:
-    print("Warning: corrected_live_api not found, using fallback")
-    LiveBybitAPI = None
-
-# Import LIVE API for REAL $50.00 USDT Balance
-from live_bybit_api import LiveBybitAPI
-
-# Load environment variables
-load_dotenv()
-
-# Page configuration
+# Set page config for wide layout and dark theme
 st.set_page_config(
-    page_title="🚀 Advanced Live Trading Dashboard - MAINNET $50.00",
-    page_icon="💰",
+    page_title="Advanced Live Trading Dashboard",
+    page_icon="🚀", 
     layout="wide",
-    initial_sidebar_state="collapsed"
+    initial_sidebar_state="expanded"
 )
 
-# Custom CSS for professional styling
+# CSS Styling
 st.markdown("""
 <style>
-    /* Professional Trading Platform Styling */
     .main-header {
         background: linear-gradient(90deg, #e74c3c 0%, #c0392b 100%);
         padding: 15px;
@@ -74,7 +37,7 @@ st.markdown("""
         animation: pulse 3s infinite;
     }
     
-    .live-indicator { 
+    .live-indicator {
         animation: pulse 2s infinite;
         color: #10b981;
         font-weight: bold;
@@ -102,71 +65,61 @@ st.markdown("""
     }
     
     .price-widget {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
+        text-align: center;
         padding: 20px;
         border-radius: 10px;
-        text-align: center;
-    }
-    
-    .order-book {
-        font-family: 'Monaco', 'Menlo', monospace;
-        font-size: 12px;
-    }
-    
-    .buy-price { color: #10b981; font-weight: bold; }
-    .sell-price { color: #ef4444; font-weight: bold; }
-    
-    .trading-control {
-        background: #1f2937;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
-        border-radius: 8px;
-        padding: 15px;
         margin: 10px 0;
     }
     
-    .emergency-button {
-        background: #dc2626 !important;
-        color: white !important;
-        font-weight: bold !important;
-        border: none !important;
-        padding: 10px 20px !important;
-        border-radius: 5px !important;
+    .order-book {
+        font-family: monospace;
+        font-size: 12px;
     }
     
-    .success-button {
-        background: #059669 !important;
-        color: white !important;
-        font-weight: bold !important;
+    .buy-price {
+        color: #10b981;
+        font-weight: bold;
+    }
+    
+    .sell-price {
+        color: #ef4444;
+        font-weight: bold;
     }
 </style>
 """, unsafe_allow_html=True)
 
-
-# Initialize API with REAL $50.00 USDT Balance
+# Initialize API with correct import handling
 @st.cache_resource
 def get_api_client():
-    return LiveBybitAPI()
+    try:
+        from corrected_live_api import LiveBybitAPI
+        return LiveBybitAPI()
+    except ImportError as e:
+        print(f"Warning: corrected_live_api import failed: {str(e)}")
+        try:
+            from live_bybit_api import LiveBybitAPI
+            print("Using live_bybit_api as fallback")
+            return LiveBybitAPI()
+        except ImportError as e:
+            print(f"Error: Both API imports failed: {str(e)}")
+            return None
 
 # Get LIVE account data
 @st.cache_data(ttl=30)
 def get_live_account_data():
     """Get REAL account data - NO SIMULATION!"""
-    api = LiveBybitAPI()
-    result = api.get_dashboard_data()
-    
-    if result['success']:
-        return {
-            'portfolio_value': result['portfolio_value'],
-            'balances': result['balances'],
-            'btc_price': result['btc_price'],
-            'btc_change_24h': result['btc_change_24h'],
-            'account_type': result['account_type'],
-            'success': True,
-            'is_real': True
-        }
-    else:
-        return {'success': False, 'error': result}
+    try:
+        api_client = get_api_client()
+        if api_client is None:
+            return {'success': False, 'error': 'API client not available'}
+        dashboard_data = api_client.get_dashboard_data()
+        print(f"Dashboard data received: {dashboard_data}")  # Debug output
+        return dashboard_data
+    except Exception as e:
+        print(f"Error in get_live_account_data: {str(e)}")  # Debug output
+        return {'success': False, 'error': str(e)}
 
 def apply_theme(dark_mode):
     """Apply theme to the app"""
@@ -230,74 +183,79 @@ def initialize_session_state():
     if 'emergency_stop' not in st.session_state:
         st.session_state.emergency_stop = False
 
-initialize_session_state()
-
 def refresh_all_data():
     """Refresh all dashboard data using LiveBybitAPI"""
-    # Get live data using our working LiveBybitAPI
-    api_client = LiveBybitAPI()
-    
-    # Get dashboard data (includes price, balance, etc.)
-    # Get all dashboard data from LiveBybitAPI
-    dashboard_data = api_client.get_dashboard_data()
-    
-    if dashboard_data['success']:
-        # Store live ticker data
-        st.session_state.live_data = {
-            'success': True,
-            'price': dashboard_data['btc_price'],
-            'change_24h': dashboard_data['btc_change_24h'],
-            'high_24h': dashboard_data['btc_high_24h'],
-            'low_24h': dashboard_data['btc_low_24h'],
-            'volume_24h': dashboard_data['btc_volume_24h'],
-            'bid': dashboard_data['bid'],
-            'ask': dashboard_data['ask'],
-            'timestamp': datetime.now() # Use current time for dashboard display
-        }
-        
-        # Store account balance
-        st.session_state.account_balance = {
-            'success': True,
-            'portfolio_value': dashboard_data['portfolio_value'],
-            'balances': dashboard_data['balances']
-        }
-        
-        # Store order book
-        st.session_state.order_book = {
-            'success': True,
-            'bids': dashboard_data['order_book_bids'],
-            'asks': dashboard_data['order_book_asks'],
-            'timestamp': datetime.now() # Use current time for dashboard display
-        }
-        
-        # Load chart data using simple API calls
-    # Simple chart data instead of complex chart component
     try:
-        if LiveBybitAPI:
-            api = LiveBybitAPI()
-            chart_data = api.get_kline_data("BTCUSDT", "5", 100)
-            if chart_data.get('success'):
-                st.session_state.chart_data = chart_data
-            else:
-                st.session_state.chart_data = {'success': False, 'error': 'Failed to load chart data'}
+        # Get live account data
+        dashboard_data = get_live_account_data()
+        print(f"Dashboard data received: {dashboard_data}")  # Debug output
+        
+        if dashboard_data['success']:
+            # Store live ticker data
+            st.session_state.live_data = {
+                'success': True,
+                'price': dashboard_data.get('btc_price', 0),
+                'change_24h': dashboard_data.get('btc_change_24h', 0),
+                'high_24h': dashboard_data.get('btc_high_24h', 0),
+                'low_24h': dashboard_data.get('btc_low_24h', 0),
+                'volume_24h': dashboard_data.get('btc_volume_24h', 0),
+                'bid': dashboard_data.get('bid', 0),
+                'ask': dashboard_data.get('ask', 0),
+                'timestamp': datetime.now()
+            }
+            
+            # Store account balance
+            st.session_state.account_balance = {
+                'success': True,
+                'portfolio_value': dashboard_data.get('portfolio_value', 0),
+                'balances': dashboard_data.get('balances', {})
+            }
+            
+            # Store order book
+            st.session_state.order_book = {
+                'success': True,
+                'bids': dashboard_data.get('order_book_bids', []),
+                'asks': dashboard_data.get('order_book_asks', []),
+                'timestamp': datetime.now()
+            }
+            
+            # Load chart data
+            try:
+                api_client = get_api_client()
+                if api_client:
+                    chart_data = api_client.get_kline_data("BTCUSDT", "5", 100)
+                    print(f"Chart data received: {chart_data}")  # Debug output
+                    
+                    if chart_data.get('success'):
+                        st.session_state.chart_data = chart_data
+                    else:
+                        st.session_state.chart_data = {'success': False, 'error': 'Failed to load chart data'}
+                else:
+                    st.session_state.chart_data = {'success': False, 'error': 'API client not available'}
+            except Exception as e:
+                st.session_state.chart_data = {'success': False, 'error': str(e)}
+                print(f"Chart data error: {str(e)}")  # Debug output
         else:
-            st.session_state.chart_data = {'success': False, 'error': 'LiveBybitAPI not available'}
+            error_msg = dashboard_data.get('error', 'Unknown API error')
+            st.session_state.live_data = {'success': False, 'error': error_msg}
+            st.session_state.account_balance = {'success': False, 'error': error_msg}
+            st.session_state.order_book = {'success': False, 'error': error_msg}
+            st.session_state.chart_data = {'success': False, 'error': error_msg}
+            print(f"Dashboard data error: {error_msg}")  # Debug output
+            
     except Exception as e:
+        print(f"Error in refresh_all_data: {str(e)}")  # Debug output
+        st.session_state.live_data = {'success': False, 'error': str(e)}
+        st.session_state.account_balance = {'success': False, 'error': str(e)}
+        st.session_state.order_book = {'success': False, 'error': str(e)}
         st.session_state.chart_data = {'success': False, 'error': str(e)}
-    else:
-        # Set error states
-        error_msg = dashboard_data.get('error', 'Unknown API error from get_dashboard_data')
-        st.session_state.live_data = {'success': False, 'error': error_msg}
-        st.session_state.account_balance = {'success': False, 'error': error_msg}
-        st.session_state.order_book = {'success': False, 'error': error_msg}
-        st.session_state.chart_data = {'success': False, 'error': error_msg}
 
 def render_main_header():
     """Render professional main header with MAINNET warning"""
     st.markdown("""
     <div class="main-header">
         <h1>🚀 ADVANCED LIVE TRADING DASHBOARD 💰</h1>
-        <h2>🔴 LIVE MAINNET - ECHTE $50.00 USDT! 🔴</h2>
+        <h2>🔴 LIVE MAINNET - ECHTE $83.38 USDT! 🔴</h2>
         <p style="font-size: 1.1rem; margin-top: 10px;">
             Enhanced Smart Money Strategy • Professional Trading Interface • Real Money
         </p>
@@ -353,6 +311,44 @@ def render_live_price_widget():
         st.error("❌ Unable to fetch live price data")
         st.error(f"Error: {live_data.get('error', 'Unknown error')}")
 
+def render_account_overview():
+    """Render account balance and portfolio overview"""
+    st.markdown("### 💼 LIVE PORTFOLIO OVERVIEW")
+    
+    account_data = st.session_state.account_balance
+    
+    if account_data.get('success'):
+        portfolio_value = account_data.get('portfolio_value', 0)
+        balances = account_data.get('balances', {})
+        
+        # Main portfolio value
+        st.markdown(f"""
+        <div class="metric-container">
+            <h2>💰 Portfolio Value: ${portfolio_value:.2f} USDT</h2>
+            <p>Live Balance - Real Money Trading Account</p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Balance breakdown
+        if balances:
+            col1, col2, col3 = st.columns(3)
+            
+            with col1:
+                usdt_balance = balances.get('USDT', 0)
+                st.metric("💵 USDT Balance", f"${usdt_balance:.2f}", "Available for Trading")
+            
+            with col2:
+                btc_balance = balances.get('BTC', 0)
+                st.metric("₿ BTC Balance", f"{btc_balance:.8f}", "Bitcoin Holdings")
+            
+            with col3:
+                # Calculate total value in USDT
+                total_crypto = sum(balances.values()) - balances.get('USDT', 0)
+                st.metric("🔄 Crypto Value", f"${total_crypto:.2f}", "Non-USDT Assets")
+    else:
+        st.error("❌ Unable to fetch account data")
+        st.error(f"Error: {account_data.get('error', 'Unknown error')}")
+
 def render_order_book():
     """Render live order book visualization"""
     st.markdown("### 📊 LIVE ORDER BOOK")
@@ -405,7 +401,7 @@ def render_order_book():
 
 def render_professional_chart():
     """Render professional trading chart with candlestick data"""
-    st.markdown("### 📈 SMART MONEY TRADING CHART")
+    st.markdown("### 📈 LIVE TRADING CHART")
     
     chart_data = st.session_state.get('chart_data', {'success': False})
     
@@ -429,7 +425,7 @@ def render_professional_chart():
                 ))
                 
                 fig.update_layout(
-                    title='BTC/USDT Chart',
+                    title='BTC/USDT Live Chart',
                     xaxis_title='Time',
                     yaxis_title='Price (USDT)',
                     height=400,
@@ -442,354 +438,92 @@ def render_professional_chart():
         except Exception as e:
             st.error(f"❌ Chart rendering error: {str(e)}")
     else:
-        st.warning("No chart data available or error loading chart data.")
+        st.warning("📊 Chart data loading...")
         if chart_data.get('error'):
             st.error(f"Error: {chart_data['error']}")
-        
-        if fig:
-            # Update layout for better visibility
-            fig.update_layout(
-                title='BTC/USDT - Smart Money Concepts (FVG, BOS, ChoCH)',
-                xaxis_title="Time",
-                yaxis_title="Price (USDT)",
-                template="plotly_dark",
-                showlegend=True,
-                legend=dict(
-                    orientation="h",
-                    yanchor="bottom",
-                    y=1.02,
-                    xanchor="right",
-                    x=1
-                )
-            )
-            
-            # Add custom legend for Smart Money Concepts
-            fig.add_annotation(
-                x=0.01,
-                y=0.99,
-                xref="paper",
-                yref="paper",
-                text="<b>Legende:</b> ",
-                showarrow=False,
-                font=dict(size=10, color="white"),
-                align="left",
-                bordercolor="#333",
-                borderwidth=1,
-                borderpad=4,
-                bgcolor="rgba(0,0,0,0.5)"
-            )
-            
-            # Add legend items
-            legend_items = [
-                ("Fair Value Gap (FVG)", "rect", "rgba(0, 255, 0, 0.2)"),
-                ("Break of Structure (BOS)", "triangle-up", "green"),
-                ("Change of Character (ChoCH)", "circle", "orange")
-            ]
-            
-            for i, (text, symbol, color) in enumerate(legend_items, 1):
-                fig.add_annotation(
-                    x=0.01,
-                    y=0.99 - (i * 0.03),
-                    xref="paper",
-                    yref="paper",
-                    text=f"{text}",
-                    showarrow=True,
-                    arrowhead=2,
-                    arrowcolor=color,
-                    arrowsize=1,
-                    arrowwidth=2,
-                    ax=30,
-                    ay=0,
-                    font=dict(size=10, color="white"),
-                    align="left"
-                )
-            
-            st.plotly_chart(fig, use_container_width=True)
-    else:
-        st.error("Failed to render the Smart Money Chart")
-else:
-    st.warning("No chart data available or error loading chart data.")
-    if 'error' in chart_data:
-        st.error(f"Error: {chart_data['error']}")
 
-def render_portfolio_monitor():
-    """Render advanced portfolio monitoring with REAL $50.00 USDT"""
-    st.markdown("### 💼 LIVE PORTFOLIO TRACKING")
-    
-    # Get REAL account data
-    live_account = get_live_account_data()
+def render_trading_controls():
+    """Render trading bot controls"""
+    st.markdown("### 🎮 TRADING CONTROLS")
     
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
-        if live_account.get('success'):
-            portfolio_value = live_account['portfolio_value']
-            st.metric(
-                "💰 REAL USDT Balance", 
-                f"${portfolio_value:.2f}",
-                f"LIVE {live_account['account_type']}"
-            )
-        else:
-            st.error("❌ Unable to fetch live balance")
-            st.metric("💰 Portfolio", "Error", "Check API")
+        if st.button("🟢 START BOT", key="start_bot"):
+            st.session_state.trading_active = True
+            st.success("✅ Trading Bot Started!")
     
     with col2:
-        # Display Initial Investment
-        st.metric(
-            "💸 Initial Investment",
-            f"${50.0:.2f}",
-            "Planned Start Amount"
-        )
-
-    with col3: # Shifted col2 to col3
-        # Calculate P&L vs 50€ start
-        if live_account.get('success'):
-            current_value = live_account['portfolio_value']
-            start_value = 50.0  # Planned start amount
-            pnl = current_value - start_value
-            pnl_pct = (pnl / start_value) * 100
-            
-            st.metric(
-                "📊 P&L vs 50€ Start",
-                f"${pnl:.2f}",
-                f"{pnl_pct:+.2f}%",
-                delta_color="normal" if pnl >= 0 else "inverse"
-            )
-        else:
-            st.metric("📊 P&L", "Error", "API Error")
+        if st.button("🔴 STOP BOT", key="stop_bot"):
+            st.session_state.trading_active = False
+            st.warning("⚠️ Trading Bot Stopped!")
     
     with col3:
-        # Current position (will be integrated with trading bot)
-        if st.session_state.trading_active:
-            st.metric("🎯 Position", "LONG BTC", f"$10.50 exposure")
-        else:
-            st.metric("🎯 Position", "No Position", "Waiting for signal")
+        if st.button("🚨 EMERGENCY STOP", key="emergency_stop_button"):
+         st.session_state.trading_active = False
+         st.error("🚨 EMERGENCY STOP ACTIVATED!")
     
     with col4:
-        # Risk level
-        risk_used = 1.2  # Will be calculated from live trades
-        max_risk = 10.0
-        risk_pct = (risk_used / max_risk) * 100
-        
-        color = "normal" if risk_pct < 50 else "inverse"
-        st.metric(
-            "🛡️ Risk Level",
-            f"{risk_pct:.1f}%",
-            f"${risk_used:.2f} / ${max_risk:.2f}",
-            delta_color=color
-        )
+        if st.button("🔄 REFRESH DATA", key="refresh_data"):
+            refresh_all_data()
+            st.info("🔄 Data refreshed!")
     
-    # Additional balance breakdown
-    if live_account.get('success'):
-        st.markdown("#### 💼 Detailed Balance Breakdown")
-        balances = live_account.get('balances', {})
-        
-        balance_col1, balance_col2 = st.columns(2)
-        
-        with balance_col1:
-            st.markdown("**Available Balances:**")
-            for coin, amount in balances.items():
-                if coin == 'USDT':
-                    st.success(f"💵 {coin}: {amount:.2f}")
-                else:
-                    st.info(f"₿ {coin}: {amount:.6f}")
-        
-        with balance_col2:
-            st.markdown("**Account Info:**")
-            st.info(f"🏦 Account Type: {live_account['account_type']}")
-            st.info("🔴 Data Source: LIVE MAINNET")
-            st.info("⚠️ Real Money Trading")
-    
-    else:
-        st.error("❌ Unable to load live account data")
-        st.error(f"Error: {live_account.get('error', 'Unknown error')}")
-
-def render_trading_controls():
-    """Render trading controls panel"""
-    st.markdown("### 🎮 TRADING CONTROLS")
-    
+    # Status indicators
+    st.markdown("#### 📊 Status")
     col1, col2, col3 = st.columns(3)
     
     with col1:
-        st.markdown("""
-        <div class="trading-control">
-            <h4>🤖 Bot Status</h4>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        if st.session_state.emergency_stop:
-            st.error("🛑 EMERGENCY STOP ACTIVE")
-            if st.button("🔄 Reset Emergency Stop", type="primary"):
-                st.session_state.emergency_stop = False
-                st.rerun()
-        else:
-            if st.session_state.trading_active:
-                st.success("✅ Trading Bot ACTIVE")
-                if st.button("⏸️ Pause Trading"):
-                    st.session_state.trading_active = False
-                    st.rerun()
-            else:
-                st.info("⏸️ Trading Bot PAUSED")
-                if st.button("▶️ Start Trading", type="primary"):
-                    st.session_state.trading_active = True
-                    st.rerun()
+        status = "🟢 AKTIV" if st.session_state.get('trading_active', False) else "🔴 INAKTIV"
+        st.markdown(f"**Bot Status:** {status}")
     
     with col2:
-        st.markdown("""
-        <div class="trading-control">
-            <h4>⚡ Quick Actions</h4>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        if st.button("🚨 EMERGENCY STOP", key="emergency", help="Stop all trading immediately"):
-            st.session_state.emergency_stop = True
-            st.session_state.trading_active = False
-            st.error("🚨 EMERGENCY STOP ACTIVATED!")
-            st.rerun()
-        
-        col2a, col2b = st.columns(2)
-        with col2a:
-            if st.button("📈 Manual BUY", disabled=st.session_state.emergency_stop):
-                st.info("Manual buy order simulated")
-        
-        with col2b:
-            if st.button("📉 Manual SELL", disabled=st.session_state.emergency_stop):
-                st.info("Manual sell order simulated")
+        emergency = "🚨 JA" if st.session_state.get('emergency_stop', False) else "✅ NEIN"
+        st.markdown(f"**Emergency Stop:** {emergency}")
     
     with col3:
-        st.markdown("""
-        <div class="trading-control">
-            <h4>⚙️ Risk Settings</h4>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        risk_per_trade = st.slider("Risk per Trade (%)", 0.5, 5.0, 2.0, 0.1)
-        max_drawdown = st.slider("Max Drawdown (%)", 5, 25, 15, 1)
-        
-        if st.button("💾 Save Settings"):
-            st.success("Settings saved!")
+        last_update = st.session_state.get('last_update', 'Never')
+        st.markdown(f"**Last Update:** {last_update}")
 
-def render_live_signals():
-    """Render live trading signals"""
-    st.markdown("### ⚡ LIVE TRADING SIGNALS")
-    
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.markdown("#### 🎯 Current Signal")
-        
-        # Simulate signal (in real implementation, this would come from the trading bot)
-        signal_strength = np.random.choice([0, 1, 2, 3, 4, 5], p=[0.4, 0.2, 0.15, 0.1, 0.1, 0.05])
-        
-        if signal_strength >= 4:
-            st.success("🟢 STRONG BUY SIGNAL")
-            st.info("4/4 filters passed • High confidence")
-        elif signal_strength >= 2:
-            st.warning("🟡 WEAK SIGNAL")
-            st.info(f"{signal_strength}/4 filters passed • Low confidence")
-        else:
-            st.info("⚪ NO SIGNAL")
-            st.info("Waiting for setup • Market analysis ongoing")
-    
-    with col2:
-        st.markdown("#### 🔍 Filter Status")
-        
-        filters = [
-            ("Volume Filter", np.random.choice([True, False], p=[0.7, 0.3])),
-            ("Key Levels", np.random.choice([True, False], p=[0.6, 0.4])),
-            ("Pattern Recognition", np.random.choice([True, False], p=[0.5, 0.5])),
-            ("Order Flow", np.random.choice([True, False], p=[0.4, 0.6]))
-        ]
-        
-        for filter_name, status in filters:
-            if status:
-                st.success(f"{filter_name}")
-            else:
-                st.error(f"{filter_name}")
-
-# Main dashboard layout
+# Main App
 def main():
     # Initialize session state
     initialize_session_state()
     
     # Apply theme
-    apply_theme(st.session_state.dark_mode)
+    apply_theme(st.session_state.get('dark_mode', True))
     
-    # Theme toggle button in header
-    with st.sidebar:
-        col1, col2 = st.columns([1, 2])
-        with col1:
-            st.markdown("" if st.session_state.dark_mode else "", unsafe_allow_html=True)
-        with col2:
-            if st.button("Dark Mode" if not st.session_state.dark_mode else "Light Mode"):
-                st.session_state.dark_mode = not st.session_state.dark_mode
-                st.rerun()
-    
+    # Render main header
     render_main_header()
     
-    # Refresh controls
-    col1, col2, col3 = st.columns([2, 1, 1])
+    # Auto-refresh logic
+    if st.session_state.get('auto_refresh', True):
+        refresh_all_data()
+        st.session_state.last_update = datetime.now().strftime("%H:%M:%S")
     
-    with col1:
-        if st.button("Refresh All Data", type="primary"):
-            with st.spinner("Refreshing live data..."):
-                refresh_all_data()
-            st.success("Data refreshed!")
-            st.rerun()
+    # Main content layout
+    tab1, tab2, tab3, tab4 = st.tabs(["Live Data", "Portfolio", "Charts", "Controls"])
+    current_tab = st.session_state.get('current_tab', 'Live Data')
     
-    with col2:
-        auto_refresh = st.checkbox("Auto-Refresh (30s)")
+    if current_tab == "Live Data":
+        with tab1:
+            render_live_price_widget()
+            st.markdown("---")
+            render_order_book()
+    elif current_tab == "Portfolio":
+        with tab2:
+            render_account_overview()
+    elif current_tab == "Charts":
+        with tab3:
+            render_professional_chart()
+    elif current_tab == "Controls":
+        with tab4:
+            render_trading_controls()
     
-    with col3:
-        st.markdown(f'<div class="live-indicator">LIVE</div>', unsafe_allow_html=True)
+    st.session_state.current_tab = current_tab
     
-    st.markdown("---")
-    
-    # Top row - Live price and order book
-    col1, col2 = st.columns([1, 1])
-    
-    with col1:
-        render_live_price_widget()
-    
-    with col2:
-        render_order_book()
-    
-    st.markdown("---")
-    
-    # Chart section
-    render_professional_chart()
-    
-    st.markdown("---")
-    
-    # Portfolio and controls
-    col1, col2 = st.columns([2, 1])
-    
-    with col1:
-        render_portfolio_monitor()
-    
-    with col2:
-        render_live_signals()
-    
-    st.markdown("---")
-    
-    # Trading controls
-    render_trading_controls()
-    
-    # Auto refresh logic
-    if auto_refresh:
-        time.sleep(30)
-        st.rerun()
-    
-    # Footer
-    st.markdown("---")
-    st.markdown("""
-    <div style='text-align: center; color: #666; padding: 20px;'>
-        🚀 <strong>ADVANCED LIVE TRADING DASHBOARD</strong> | 
-        💹 <strong>Enhanced Smart Money Strategy</strong> | 
-        🔴 <strong>LIVE TRADING READY</strong> | 
-        © 2025 Professional Trading System
-    </div>
-    """, unsafe_allow_html=True)
+    # Auto-refresh mechanism
+    time.sleep(5)
+    st.rerun()
 
 if __name__ == "__main__":
     main()

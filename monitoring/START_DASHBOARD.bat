@@ -1,21 +1,42 @@
 @echo off
-echo ****************************************************
-echo *                                                  *
-echo *   LIVE MAINNET DASHBOARD - FIXED API VERSION     *
-echo *                                                  *
-echo ****************************************************
-echo.
-echo Starting dashboard with fixed API integration...
-echo.
-echo Note: If this doesn't work, make sure streamlit is installed:
-echo       pip install streamlit plotly pandas python-dotenv psutil
+echo ----------------------------------------
+echo Starte Enhanced Smart Money Bot Dashboard
+echo ----------------------------------------
 echo.
 
-cd /d %~dp0
-streamlit run LIVE_MAINNET_DASHBOARD.py --server.port 8504
+cd %~dp0
+echo Aktuelles Verzeichnis: %CD%
+echo.
 
+REM Prüfen, ob Python im Pfad ist
+where python >nul 2>nul
+if %ERRORLEVEL% NEQ 0 (
+    echo FEHLER: Python wurde nicht gefunden!
+    echo Bitte stellen Sie sicher, dass Python installiert ist und im PATH steht.
+    goto :EOF
+)
+
+REM Prüfen, ob Streamlit installiert ist
+python -c "import streamlit" >nul 2>nul
+if %ERRORLEVEL% NEQ 0 (
+    echo Streamlit nicht gefunden. Installiere Streamlit...
+    pip install streamlit
+)
+
+REM Prüfen, ob pybit installiert ist
+python -c "import pybit" >nul 2>nul
+if %ERRORLEVEL% NEQ 0 (
+    echo pybit nicht gefunden. Installiere pybit...
+    pip install pybit
+)
+
+echo Voraussetzungen erfüllt. Starte Dashboard...
 echo.
-echo If the browser didn't open automatically, go to:
-echo http://localhost:8504
+echo Dashboard wird in Ihrem Browser geöffnet...
 echo.
+echo Drücken Sie STRG+C im Terminal, um das Dashboard zu beenden.
+echo.
+
+streamlit run enhanced_smart_money_bot_dashboard.py --server.port 8505
+
 pause

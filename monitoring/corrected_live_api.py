@@ -9,6 +9,7 @@ import hashlib
 import hmac
 import time
 import os
+import re
 from datetime import datetime
 from dotenv import load_dotenv
 import pandas as pd
@@ -277,18 +278,45 @@ class LiveBybitAPI:
             return {'success': False, 'error': str(e)}
 
     def get_kline_data(self, symbol='BTCUSDT', interval='5', limit=100):
-        """Get candlestick data for charts"""
+        """Get candlestick data for charts with proper handling for all intervals"""
         try:
             print(f"Fetching kline data for {symbol}, interval {interval}, limit {limit}")
             
-            # Direkte API-Anfrage ohne make_request für schnellere Ergebnisse
+            # Konvertiere interval in den richtigen String
+            interval_map = {
+                'D': 'D',           # Daily
+                '1d': 'D',          # Daily (alternative)
+                '1440': 'D',        # Daily (minutes in a day)
+                'W': 'W',           # Weekly
+                '1w': 'W',          # Weekly (alternative)
+                'M': 'M',           # Monthly
+                '1M': 'M',          # Monthly (alternative)
+                '1': '1',           # 1 minute
+                '3': '3',           # 3 minutes
+                '5': '5',           # 5 minutes
+                '15': '15',         # 15 minutes
+                '30': '30',         # 30 minutes
+                '60': '60',         # 1 hour
+                '1h': '60',         # 1 hour (alternative)
+                '120': '120',       # 2 hours
+                '2h': '120',        # 2 hours (alternative)
+                '240': '240',       # 4 hours
+                '4h': '240',        # 4 hours (alternative)
+                '480': '480',       # 8 hours
+                '8h': '480',        # 8 hours (alternative)
+            }
+            
+            # Verwende die Mapping-Tabelle oder den ursprünglichen Wert, wenn nicht gefunden
+            interval_str = interval_map.get(interval, interval)
+            
+            # Direkte API-Anfrage für schnellere Ergebnisse
             url = f"{self.base_url}/v5/market/kline"
             
             # Parameter für die Anfrage
             params = {
                 'category': 'spot',
                 'symbol': symbol,
-                'interval': interval,
+                'interval': interval_str,
                 'limit': str(limit)
             }
             

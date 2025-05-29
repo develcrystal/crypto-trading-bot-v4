@@ -17,7 +17,7 @@ type live_trading_bot.log | tail -10
 ### **2. Dashboard wiederherstellen:**
 ```bash
 cd "J:\Meine Ablage\CodingStuff\crypto-bot_V2\monitoring"
-streamlit run enhanced_dashboard.py --server.port 8507
+streamlit run enhanced_smart_money_bot_dashboard.py --server.port 8507
 # Browser: http://localhost:8507
 ```
 
