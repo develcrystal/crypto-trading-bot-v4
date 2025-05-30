@@ -9,6 +9,7 @@ import sys
 import time
 import logging
 import requests
+import json  # Added for command handling
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
 
@@ -49,6 +50,15 @@ class EnhancedLiveTradingBot:
         logger.info("Enhanced Live Trading Bot initialisiert")
         logger.info(f"API Key: {self.api_key[:8] if self.api_key else 'MISSING'}...")
         logger.info(f"Testnet Mode: {self.testnet}")
+        
+        # Status reporting setup
+        self.status_file = "bot_status.json"
+        self.command_file = "bot_commands.json"
+        self._initialize_status_files()
+        
+        # Trading control flags
+        self.paused = False
+        self.running = True
     
     def get_bybit_price(self):
         """Holt aktuellen BTC Preis von Bybit"""
@@ -233,24 +243,94 @@ class EnhancedLiveTradingBot:
         
         logger.info("=" * 50)
     
-    def start_live_trading(self, duration_minutes=60):
-        """Startet Live Trading für bestimmte Dauer"""
+    def _initialize_status_files(self):
+        """Initialize status and command files"""
+        if not os.path.exists(self.status_file):
+            with open(self.status_file, 'w') as f:
+                json.dump({"status": "RUNNING", "pid": os.getpid(), "timestamp": time.time()}, f)
+        
+        if not os.path.exists(self.command_file):
+            with open(self.command_file, 'w') as f:
+                json.dump({"command": "NONE", "timestamp": time.time()}, f)
+
+    def _update_status(self, status: str):
+        """Update status file"""
+        with open(self.status_file, 'w') as f:
+            json.dump({"status": status, "pid": os.getpid(), "timestamp": time.time()}, f)
+
+    def _check_commands(self):
+        """Check for new commands from dashboard"""
+        try:
+            if os.path.exists(self.command_file):
+                with open(self.command_file, 'r') as f:
+                    command_data = json.load(f)
+                    return command_data.get('command', 'NONE')
+            return 'NONE'
+        except:
+            return 'NONE'
+    
+    def _clear_command(self):
+        """Clear command after processing"""
+        with open(self.command_file, 'w') as f:
+            json.dump({"command": "NONE", "timestamp": time.time()}, f)
+
+    def handle_command(self, command: str):
+        """Execute command from dashboard"""
+        if command == "STOP":
+            logger.info("Received STOP command - stopping bot gracefully")
+            self._update_status("STOPPED")
+            self.running = False
+            return True
+        elif command == "PAUSE":
+            logger.info("Received PAUSE command - pausing trading")
+            self.paused = True
+            self._update_status("PAUSED")
+            return True
+        elif command == "RESUME":
+            logger.info("Received RESUME command - resuming trading")
+            self.paused = False
+            self._update_status("RUNNING")
+            return True
+        elif command == "EMERGENCY_STOP":
+            logger.info("EMERGENCY STOP command - closing positions immediately!")
+            # Add position closing logic here
+            self._update_status("EMERGENCY_STOP")
+            self.running = False
+            return True
+        return False
+
+    def start_live_trading(self):
+        """Startet Live Trading (continuous until stopped)"""
         logger.info("STARTING ENHANCED LIVE TRADING BOT")
         logger.info("=" * 50)
-        logger.info(f"Duration: {duration_minutes} minutes")
         logger.info("Mode: TESTNET (Simulated trades)")
         logger.info("Strategy: Enhanced Smart Money")
         logger.info("=" * 50)
         
         self.running = True
+        self.paused = False
         self.start_time = datetime.now()
-        end_time = self.start_time + timedelta(minutes=duration_minutes)
+        self._update_status("RUNNING")
         
         last_status_log = datetime.now()
         
         try:
-            while self.running and datetime.now() < end_time:
+            while self.running:
                 try:
+                    # Check for commands from dashboard
+                    command = self._check_commands()
+                    if command != "NONE":
+                        if self.handle_command(command):
+                            self._clear_command()
+                            if not self.running:
+                                break
+                    
+                    # Skip trading if paused
+                    if self.paused:
+                        logger.info("Trading paused - skipping trade execution")
+                        time.sleep(10)
+                        continue
+                    
                     # Hole aktuelle Marktdaten
                     price_data = self.get_bybit_price()
                     
@@ -263,14 +343,64 @@ class EnhancedLiveTradingBot:
                         # Log Market Info
                         logger.info(f"BTC Price: ${current_price:.2f} | 24h Change: {price_data['change']:+.2f}%")
                         logger.info(f"Market Regime: {regime_info['regime']} (Confidence: {regime_info['confidence']:.2f})")
-                        
-                        # Trading Signal generieren
-                        signal_data = self.generate_trading_signal(price_data, regime_info)
-                        
-                        # Trade ausführen
-                        self.execute_trade(signal_data, current_price)
-                        
-                        # Status loggen alle 5 Minuten
+                        try:
+                            while self.running:
+                                # Check for commands from dashboard
+                                command = self._check_commands()
+                                if command != "NONE":
+                                    if self.handle_command(command):
+                                        self._clear_command()
+                                        if not self.running:
+                                            break
+                                
+                                # Skip trading if paused
+                                if self.paused:
+                                    logger.info("Trading paused - skipping trade execution")
+                                    time.sleep(10)
+                                    continue
+                                
+                                try:
+                                    # Hole aktuelle Marktdaten
+                                    price_data = self.get_bybit_price()
+                                    
+                                    if price_data['success']:
+                                        current_price = price_data['price']
+                                        
+                                        # Market Regime Detection
+                                        regime_info = self.detect_market_regime(price_data)
+                                        
+                                        # Log Market Info
+                                        logger.info(f"BTC Price: ${current_price:.2f} | 24h Change: {price_data['change']:+.2f}%")
+                                        logger.info(f"Market Regime: {regime_info['regime']} (Confidence: {regime_info['confidence']:.2f})")
+                                        
+                                        # Trading Signal generieren
+                                        signal_data = self.generate_trading_signal(price_data, regime_info)
+                                        
+                                        # Trade ausführen
+                                        self.execute_trade(signal_data, current_price)
+                                        
+                                        # Status loggen alle 5 Minuten
+                                        if datetime.now() - last_status_log > timedelta(minutes=5):
+                                            self.log_status()
+                                            last_status_log = datetime.now()
+                                    
+                                    else:
+                                        logger.warning(f"API Error: {price_data['error']}")
+                                    
+                                    # Warte 30 Sekunden bis zum nächsten Check
+                                    logger.info("Waiting 30 seconds for next analysis...")
+                                    time.sleep(30)
+                                    
+                                except Exception as e:
+                                    logger.error(f"Error in trading loop: {e}")
+                                    time.sleep(60)  # Warte 1 Minute bei Fehlern
+                                    
+                        except KeyboardInterrupt:
+                            logger.info("Trading stopped by user")
+                        except Exception as e:
+                            logger.error(f"Critical error: {e}")
+                        finally:
+                            self.generate_final_report()
                         if datetime.now() - last_status_log > timedelta(minutes=5):
                             self.log_status()
                             last_status_log = datetime.now()
@@ -352,17 +482,11 @@ def main():
         logger.error(f"FAILED: Cannot connect to Bybit API - {price_test['error']}")
         return
     
-    # Frage Benutzer nach Trading-Dauer
-    try:
-        duration = int(input("\nEnter trading duration in minutes (default: 60): ") or "60")
-    except ValueError:
-        duration = 60
-    
-    logger.info(f"Starting {duration}-minute live trading session...")
+    logger.info("Starting continuous live trading session...")
     
     try:
-        # Live Trading starten
-        bot.start_live_trading(duration_minutes=duration)
+        # Live Trading starten (continuous until stopped by command)
+        bot.start_live_trading()
         
     except KeyboardInterrupt:
         print("\nTrading stopped by user (Ctrl+C)")

@@ -8,8 +8,15 @@ Author: Romain Hill © 2025
 """
 
 import sys
-import io
 import os
+import io
+
+# Add project root to Python path
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+
+from core.bot_controller import BotController  # Added for bot control
 
 # Setze die Standardausgabekodierung auf UTF-8
 if sys.stdout.encoding != 'utf-8':
@@ -83,14 +90,62 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ============================================================================
-# DATA GENERATION & MANAGEMENT
+# UNIFIED DATA SERVICE
+# ============================================================================
+
+class DataService:
+    """Centralized data service for consistent API access"""
+    
+    def __init__(self):
+        self.live_api = LiveBybitAPI()
+        self.bybit_client = BybitClient()
+        self.cache = {}
+        
+    def get_portfolio_data(self):
+        """Get unified portfolio data from API"""
+        if 'portfolio' not in self.cache:
+            data = self.live_api.get_wallet_balance()
+            if data['success']:
+                self.cache['portfolio'] = data
+            else:
+                # Fallback to simulated data if API fails
+                return self.get_simulated_portfolio()
+        return self.cache['portfolio']
+    
+    def get_market_data(self, symbol, interval, limit):
+        """Get unified market data"""
+        key = f"market_{symbol}_{interval}_{limit}"
+        if key not in self.cache:
+            data = self.bybit_client.get_market_data(
+                symbol=symbol,
+                interval=interval,
+                limit=limit
+            )
+            if data is not None:
+                self.cache[key] = data
+        return self.cache.get(key)
+    
+    def get_open_positions(self):
+        """Get unified open positions data"""
+        return self.live_api.check_open_positions()
+    
+    def get_simulated_portfolio(self):
+        """Fallback simulated data (temporary)"""
+        return {
+            'balances': {'USDT': 52.70, 'BTC': 0.00027872},
+            'total_usdt_value': 82.37,
+            'success': True
+        }
+
+# ============================================================================
+# ENHANCED DATA PROVIDER (USES DATA SERVICE)
 # ============================================================================
 
 class EnhancedDataProvider:
-    """Advanced data provider for enhanced dashboard"""
+    """Advanced data provider using unified data service"""
     
     def __init__(self):
-        self.live_api = LiveBybitAPI()  # Initialize API first
+        self.data_service = DataService()
         self.session_state = self._init_session_state()
         
     def _init_session_state(self):
@@ -99,17 +154,13 @@ class EnhancedDataProvider:
             # Generate realistic portfolio history starting from actual balance
             dates = pd.date_range(start=datetime.now() - timedelta(days=30), periods=720, freq='h')
             
-            # Get current live balance
-            # Verwende get_dashboard_data statt get_all_dashboard_data
-            try:
-                live_data = self.live_api.get_dashboard_data()
-                if live_data.get('success'):
-                    current_value = live_data['portfolio_value']
-                else:
-                    current_value = 83.38  # Fallback
-            except Exception as e:
-                st.error(f"Fehler beim Abrufen von Live-Daten: {e}")
+            # Get current live balance from unified data service
+            portfolio_data = self.data_service.get_portfolio_data()
+            if portfolio_data['success']:
+                current_value = portfolio_data['total_usdt_value']
+            else:
                 current_value = 83.38  # Fallback
+                st.error("Fehler beim Abrufen von Portfolio-Daten")
             
             # Generate realistic returns leading to current value
             returns = np.random.normal(0.0002, 0.015, len(dates)-1)  # More conservative
@@ -347,23 +398,73 @@ def render_main_overview(data_provider):
             delta_color=delta_color
         )
 
+def render_position_status(live_api):
+    """Render panel showing current positions and open orders"""
+    st.markdown("## 📊 **POSITIONSSTATUS**")
+    
+    try:
+        # Use unified data service for position data
+        position_status = data_service.get_open_positions()
+        if not position_status or not isinstance(position_status, dict):
+            st.warning("⚠️ Keine gültigen Positionsdaten erhalten")
+            return
+    except Exception as e:
+        st.error(f"❌ Fehler beim Abrufen der Positionsdaten: {str(e)}")
+        return
+            
+        if position_status.get('success', False):
+            positions = position_status.get('positions', {})
+            has_open_position = positions.get('open_positions', False)
+            
+            if has_open_position:
+                st.warning("⚠️ **AKTIVE POSITIONEN GEFUNDEN**")
+                
+                # Show open orders if available
+                open_orders = positions.get('open_orders', [])
+                if open_orders and isinstance(open_orders, list) and len(open_orders) > 0:
+                    st.subheader("Offene Orders")
+                    try:
+                        orders_df = pd.DataFrame(open_orders)
+                        # Filter relevant columns
+                        cols_to_show = ['symbol', 'side', 'price', 'qty', 'orderStatus']
+                        available_cols = [col for col in cols_to_show if col in orders_df.columns]
+                        if available_cols:
+                            st.dataframe(orders_df[available_cols])
+                        else:
+                            st.warning("Keine gültigen Bestelldaten verfügbar")
+                    except Exception as e:
+                        st.error(f"Fehler beim Verarbeiten der Bestelldaten: {str(e)}")
+                
+                # Show asset balances if available
+                non_usdt_assets = positions.get('non_usdt_assets', {})
+                if non_usdt_assets and isinstance(non_usdt_assets, dict):
+                    st.subheader("Aktuelle Bestände")
+                    for asset, balance in non_usdt_assets.items():
+                        if isinstance(balance, (int, float)):
+                            st.info(f"{asset}: {balance:.6f}")
+                
+                # Show total portfolio value if available
+                total_usdt = positions.get('total_usdt')
+                if total_usdt is not None and isinstance(total_usdt, (int, float)):
+                    st.metric("Gesamtportfolio Wert", f"{float(total_usdt):.2f} USDT")
+            else:
+                st.success("✅ **KEINE AKTIVEN POSITIONEN**")
+        else:
+            error_msg = position_status.get('error', 'Unbekannter Fehler')
+            st.error(f"API-Fehler: {error_msg}")
+    except Exception as e:
+        st.error(f"Kritischer Fehler in render_position_status: {str(e)}")
+        import traceback
+        st.text(traceback.format_exc())  # Zeige den vollständigen Stacktrace für Debugging
+
 def render_market_regime_panel(data_provider):
     """Render market regime detection panel with real market data"""
     st.markdown("## 🧠 **MARKTREGIME-ANALYSE**")
     
     try:
         # Initialize Bybit client
-        from trading.bybit_client import BybitClient
-        import pandas as pd
-        import numpy as np
-        
-        bybit = BybitClient()
-        
-        # Get 4h data for better regime detection
-        # Get 4h data for better regime detection
-        print("Versuche, Marktdaten für das Regime-Panel abzurufen...")
-        df = bybit.get_market_data(symbol="BTCUSDT", interval="240", limit=100)
-        
+        # Get market data from unified data service
+        df = data_service.get_market_data(symbol="BTCUSDT", interval="240", limit=100)
         if df is not None and not df.empty:
             print(f"✅ Erfolgreich {len(df)} 4h-Kerzen für Regime-Analyse geladen")
             # Calculate indicators
@@ -1177,24 +1278,69 @@ def render_sidebar_controls():
     """Render sidebar controls with improved structure and German labels"""
     st.sidebar.title("🎛️ **SMART MONEY KONTROLLE**")
     
+    # Initialize BotController
+    if 'bot_controller' not in st.session_state:
+        st.session_state.bot_controller = BotController()
+    
+    controller = st.session_state.bot_controller
+    status = controller.get_status()
+    
     # ===== 🤖 BOT CONTROL =====
     with st.sidebar.expander("🤖 **Bot Steuerung**", expanded=True):
         # Bot Status Anzeige
         status_col1, status_col2 = st.columns([1, 3])
+        
+        # Determine status icon and text
+        status_icon = "🟢" if status['status'] == "RUNNING" else "🟡" if status['status'] == "PAUSED" else "🔴"
+        status_text = {
+            "RUNNING": "AKTIV",
+            "PAUSED": "PAUSIERT",
+            "STOPPED": "GESTOPPT",
+            "EMERGENCY_STOP": "NOTFALL"
+        }.get(status['status'], "UNBEKANNT")
+        
         with status_col1:
-            st.metric("Status", "🟢 AKTIV" if st.session_state.get('bot_active', False) else "🔴 GESTOPPT")
+            st.metric("Status", f"{status_icon} {status_text}")
         
         with status_col2:
-            if st.button("▶️ Starten" if not st.session_state.get('bot_active', False) else "⏹️ Stoppen", 
-                       type="primary" if not st.session_state.get('bot_active', False) else "secondary",
-                       use_container_width=True):
-                st.session_state.bot_active = not st.session_state.get('bot_active', False)
-                st.rerun()
+            # Start/Stop button
+            if status['status'] == "STOPPED":
+                if st.button("▶️ Starten", type="primary", use_container_width=True):
+                    result = controller.start_bot()
+                    if result['success']:
+                        st.success("✅ Trading Bot gestartet")
+                    else:
+                        st.error(f"❌ Fehler: {result['error']}")
+                    time.sleep(1)
+                    st.rerun()
+            else:
+                if st.button("⏹️ Stoppen", type="secondary", use_container_width=True):
+                    result = controller.stop_bot()
+                    if result['success']:
+                        st.success("✅ Trading Bot gestoppt")
+                    else:
+                        st.error(f"❌ Fehler: {result['error']}")
+                    time.sleep(1)
+                    st.rerun()
         
-        # Pause Button
-        if st.session_state.get('bot_active', False):
+        # Pause/Resume button
+        if status['status'] == "RUNNING":
             if st.button("⏸️ Pausieren", use_container_width=True):
-                st.session_state.bot_paused = not st.session_state.get('bot_paused', False)
+                result = controller.pause_bot()
+                if result['success']:
+                    st.success("✅ Trading pausiert")
+                else:
+                    st.error(f"❌ Fehler: {result['error']}")
+                time.sleep(1)
+                st.rerun()
+        elif status['status'] == "PAUSED":
+            if st.button("▶️ Fortsetzen", use_container_width=True):
+                result = controller.resume_bot()
+                if result['success']:
+                    st.success("✅ Trading fortgesetzt")
+                else:
+                    st.error(f"❌ Fehler: {result['error']}")
+                time.sleep(1)
                 st.rerun()
     
     # ===== 📡 SYSTEM STATUS =====
@@ -1233,22 +1379,27 @@ def render_sidebar_controls():
                                  help="Aktualisiert das Dashboard automatisch alle 5 Sekunden")
         
         # Notfall-Controls
+        # Notfall-Controls
         st.markdown("### 🚨 Notfallmaßnahmen")
         col1, col2 = st.columns(2)
         
         with col1:
-            if st.button("⛔ Sofort stoppen", type="primary", 
-                        help="Stoppt alle Handelsaktivitäten sofort"):
-                st.session_state.bot_active = False
-                st.error("❌ ALLE HANDELSVORGÄNGE WURDEN GESTOPPT!")
-                st.balloons()
+            if st.button("⛔ Sofort stoppen", type="primary",
+                        help="Stoppt alle Handelsaktivitäten sofort und liquidiert Positionen"):
+                result = controller.emergency_stop()
+                if result['success']:
+                    st.error("❌ NOTFALLSTOPP AKTIVIERT! Positionen werden liquidiert.")
+                else:
+                    st.error(f"❌ Fehler: {result['error']}")
+                time.sleep(1)
+                st.rerun()
         
         with col2:
             if st.button("🔄 Zurücksetzen", help="Setzt das System zurück"):
-                st.session_state.bot_active = False
-                st.session_state.bot_paused = False
+                st.session_state.bot_controller = BotController()
                 st.success("✅ System erfolgreich zurückgesetzt")
-    
+                time.sleep(1)
+                st.rerun()
     # ===== 📊 DATEN & EXPORT =====
     with st.sidebar.expander("📊 **Daten & Export**"):
         st.markdown("### 💾 Datenexport")
@@ -1276,7 +1427,8 @@ def render_sidebar_controls():
 def main():
     """Main dashboard application"""
     
-    # Initialize data provider
+    # Initialize APIs
+    live_api = LiveBybitAPI()
     data_provider = EnhancedDataProvider()
     
     # Main title with status
@@ -1292,6 +1444,10 @@ def main():
     
     # Render all dashboard components
     render_main_overview(data_provider)
+    st.markdown("---")
+    
+    # Render position status panel
+    render_position_status(live_api)
     st.markdown("---")
     
     render_market_regime_panel(data_provider)
