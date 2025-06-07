@@ -24,7 +24,7 @@
 
 ### **1. Installation**
 ```bash
-git clone https://github.com/yourusername/crypto-trading-bot-v4.git
+git clone https://github.com/develcrystal/crypto-trading-bot-v4.git
 cd crypto-trading-bot-v4
 pip install -r requirements.txt
 ```
@@ -242,8 +242,8 @@ pyyaml>=6.0
 
 ## 📞 **Support**
 
-- **Issues**: [GitHub Issues](https://github.com/yourusername/crypto-trading-bot-v4/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/crypto-trading-bot-v4/discussions)
+- **Issues**: [GitHub Issues](https://github.com/develcrystal/crypto-trading-bot-v4/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/develcrystal/crypto-trading-bot-v4/discussions)
 - **Documentation**: Siehe `docs/` Verzeichnis
 
 ---
