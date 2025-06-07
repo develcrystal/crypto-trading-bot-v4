@@ -1,0 +1,42 @@
+{
+  "clean_repository": {
+    "name": "crypto-trading-bot-v4-clean",
+    "description": "Production-ready version with only essential files",
+    "created": "2025-06-07",
+    "total_files": 12,
+    "categories": {
+      "core_bot": 5,
+      "documentation": 6,
+      "configuration": 1
+    }
+  },
+  "essential_files": [
+    "enhanced_live_bot.py",
+    "test_live_api_connection.py",
+    "exchange/bybit_api.py",
+    "core/bot_status_monitor.py",
+    "core/__init__.py",
+    "README.md",
+    "SETUP_GUIDE.md",
+    "LICENSE",
+    ".env.example",
+    "requirements.txt",
+    "version.json",
+    ".gitignore"
+  ],
+  "removed_development_files": [
+    "All backtesting scripts",
+    "Development documentation",
+    "Test files and launchers",
+    "Batch scripts",
+    "Log files",
+    "Runtime JSON files",
+    "Entire development directories"
+  ],
+  "github_ready": {
+    "security": "All sensitive data protected",
+    "documentation": "Complete setup and usage guides",
+    "minimal": "Only files needed for bot operation",
+    "production": "Ready for live 50\u20ac trading"
+  }
+}

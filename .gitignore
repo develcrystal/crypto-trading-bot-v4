@@ -1,0 +1,114 @@
+# 🔒 SECURITY - SENSITIVE FILES
+.env
+.env.local
+.env.production
+.env.staging
+*.key
+*.secret
+*credentials*
+*config.json
+api_keys.txt
+secrets.txt
+
+# 📊 RUNTIME & LOGS
+*.log
+live_trading_bot.log
+live_trading_mainnet_50eur.log
+bot_status.json
+bot_commands.json
+*.pid
+
+# 📈 TRADING DATA & RESULTS
+backtest_results/
+trade_history/
+performance_data/
+*.csv
+*.xlsx
+equity_curves/
+
+# 🐍 PYTHON
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# 🔧 DEVELOPMENT
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# 📦 VIRTUAL ENVIRONMENTS
+venv/
+env/
+ENV/
+crypto-bot_V2/
+.conda/
+
+# 🗃️ DATABASE
+*.db
+*.sqlite3
+*.sqlite
+
+# 📊 MONITORING DATA
+monitoring/performance_cache/
+monitoring/trade_logs/
+
+# 🧪 TESTING
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+
+# 📋 BACKUP & ARCHIVE
+archive/
+backups/
+*.bak
+*.backup
+old/
+deprecated/
+
+# 🏗️ BUILD & DEPLOYMENT
+docker-compose.override.yml
+.dockerignore
+
+# 📱 OS GENERATED
+.DS_Store?
+ehthumbs.db
+Icon?
+Thumbs.db
+
+# 🔄 GIT
+.git/
+.gitconfig
+
+# 📂 PROJECT SPECIFIC
+108checke/
+.history/
+temp/
+tmp/
