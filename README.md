@@ -1,519 +1,279 @@
-# Crypto Trading Bot V2 🚀
+# 🚀 Crypto Trading Bot V4 - Production Ready
 
 ![License](https://img.shields.io/badge/License-MIT-blue.svg)
-![Development Status](https://img.shields.io/badge/Status-LIVE%20MAINNET%20READY-green.svg)
+![Status](https://img.shields.io/badge/Status-Production%20Ready-green.svg)
 ![Python](https://img.shields.io/badge/Python-3.8%2B-blue.svg)
-![Bybit](https://img.shields.io/badge/Exchange-Bybit%20V5-orange.svg)
+![Exchange](https://img.shields.io/badge/Exchange-Bybit%20V5-orange.svg)
 
-## 🎉 LIVE MAINNET DEPLOYMENT - Mai 2025
-
-**✅ LIVE TRADING AKTIV!** - System läuft erfolgreich auf Bybit Mainnet mit echtem Geld!
-
-- 🔧 **Bybit V5 API Integration**: 100% funktionsfähig - Unicode-Probleme gelöst
-- 🚀 **Enhanced Smart Money Strategy**: Live und aktiv auf Mainnet
-- 💰 **Live Trading**: Erfolgreich deployed mit 83.38 USDT Balance
-- 📊 **Real-time Dashboard**: Funktioniert perfekt mit Live-Daten
-- 🧠 **Market Regime Detection**: Bull/Bear/Sideways automatische Erkennung
-- ⚡ **Auto-Start System**: Vollautomatische 8-Stunden Trading Sessions
-
-## 🚀 Startkonfiguration & Prozessübersicht
-
-### Wichtige Dateien & deren Funktionen:
-
-```
-crypto-bot_V2/
-├── 📁 .env                     # Konfiguration & API-Keys
-├── 🚀 launch_mainnet_dashboard.py  # Startet das Haupt-Dashboard
-├── 📁 ui/                       # Benutzeroberfläche
-│   ├── main_dashboard.py       # Haupt-Dashboard Logik
-│   └── components/             # UI-Komponenten
-│       └── real_balance.py     # Anzeige der Kontostände
-├── 📁 core/                     # Kernfunktionalität
-│   └── api_client.py           # Bybit API Integration (als BybitAPI)
-└── 📁 monitoring/              # Überwachung & Logging
-```
-
-### Startprozess:
-
-1. **Initialisierung**:
-   ```bash
-   python launch_mainnet_dashboard.py
-   ```
-   - Lädt Konfiguration aus `.env`
-   - Initialisiert die API-Verbindung zu Bybit
-   - Startet das Streamlit Dashboard
-
-2. **Dashboard Start**:
-   ```
-   ============================================================
-   🚀 LAUNCHING ADVANCED LIVE TRADING DASHBOARD
-   ============================================================
-   📁 Project Directory: /path/to/crypto-bot_V2
-   📁 Dashboard Path: /path/to/crypto-bot_V2/ui/main_dashboard.py
-   🔴 MAINNET MODE - REAL $50.00 USDT!
-   ```
-
-3. **Zugriff auf das Dashboard**:
-   - Lokal: http://localhost:8505
-   - Netzwerk: http://[Ihre-IP]:8505
-
-### Wichtige Hinweise:
-- Die API-Keys in `.env` müssen gültig und aktiv sein
-- Das Dashboard benötigt eine stabile Internetverbindung
-- Bei Verbindungsproblemen wird automatisch ein Reconnect versucht
-- Alle Trades werden im Logfile protokolliert
-
-### Fehlerbehebung:
-- Bei Verbindungsabbrüchen startet sich das System automatisch neu
-- API-Fehler werden im Dashboard und in der Log-Datei protokolliert
-- Bei kritischen Fehlern wird der Handelsmodus automatisch deaktiviert
+**🎉 FINALLY WORKING VERSION!** - Enhanced Smart Money Trading Bot mit echter Bybit Mainnet Integration
 
 ---
 
-## 📋 Übersicht
+## ✨ **Was ist neu in V4?**
 
-**Crypto Trading Bot V2** ist ein autonomes Kryptowährungs-Handelssystem, das speziell für die Bybit-Börse entwickelt wurde. Das System implementiert fortschrittliche "Smart Money"-Handelsstrategien mit robusten Risikomanagement- und Echtzeitmarktanalyse-Funktionen.
-
-### 🏆 Live Performance (Mai 2025)
-- **Enhanced Smart Money Strategy**: +128% bessere Returns vs Classic
-- **Win Rate**: 81% (vs 68% Classic Strategy)
-- **Max Drawdown**: -39% reduziert (11% vs 18%)
-- **Signal Quality**: Deutlich verbessert durch adaptive Filter
-- **Live Status**: ✅ **AKTIV AUF MAINNET** seit 25.05.2025
-
-## 🚀 Aktueller Status (Mai 2025)
-
-- **Version**: 2.2.2-modular-dashboard-live
-- **API Integration**: ✅ **VOLLSTÄNDIG FUNKTIONSFÄHIG** - $83.38 USDT confirmed
-- **Live Trading**: ✅ **PRODUCTION ACTIVE** - Bybit Mainnet operational
-- **Enhanced Strategy**: ✅ **LIVE DEPLOYED** - Market Regime Detection aktiv
-- **Advanced Dashboard**: ✅ **OPERATIONAL** - Professional Trading Interface
-- **Real-time Monitoring**: ✅ **AKTIV** - Live Portfolio & Signal Tracking
-- **Audio Alert System**: ✅ **INTEGRIERT** - Windows Sound Feedback
-- **Identity Verification**: ✅ **ABGESCHLOSSEN** - Bybit Mainnet freigeschaltet
-
-### 🔧 Kürzlich Gelöste Probleme
-- ✅ **Advanced Dashboard API Fix** - LiveBybitAPI Compatibility behoben
-- ✅ **Live Portfolio Integration** - $83.38 USDT Balance korrekt angezeigt
-- ✅ **Professional Charts** - Candlestick Charts mit echten BTC Preisen
-- ✅ **Order Book Display** - Live Bid/Ask Spreads funktional
-- ✅ **Bot Control Integration** - Trading Controls fully operational
+- ✅ **100% funktionsfähige Bybit Mainnet Integration**
+- ✅ **Enhanced Smart Money Strategy** mit Market Regime Detection
+- ✅ **Echte API-Authentifizierung** (HMAC SHA256)
+- ✅ **Windows PowerShell kompatibel** (Unicode-Encoding behoben)
+- ✅ **Live Trading ready** für 50€ Startkapital
+- ✅ **Professionelle Fehlerbehandlung**
 
 ---
 
-## ⚡ Quick Start - Live Trading
+## 🎯 **Quick Start**
 
-### 1. API Setup
+### **1. Installation**
 ```bash
-# 1. Bybit Mainnet Account: https://www.bybit.com
-# 2. API Keys mit Trading-Berechtigungen erstellen
-# 3. API Credentials in .env eintragen
-```
-
-### 2. Installation
-```bash
-git clone https://github.com/develcrystal/Crypto-Trading-Bot-V2.git
-cd Crypto-Trading-Bot-V2
+git clone https://github.com/yourusername/crypto-trading-bot-v4.git
+cd crypto-trading-bot-v4
 pip install -r requirements.txt
+```
+
+### **2. Konfiguration**
+```bash
+# .env Datei erstellen
 cp .env.example .env
-# Bearbeite .env mit deinen API Keys
+
+# API Keys eintragen (siehe Setup Guide)
+# BYBIT_API_KEY=your_api_key
+# BYBIT_API_SECRET=your_api_secret
+# TESTNET=false
 ```
 
-### 3. Live Trading Starten
+### **3. Live Trading starten**
 ```bash
-# MODULAR Dashboard (Professional Interface)
-START_MODULAR_DASHBOARD.bat
-# URL: http://localhost:8505 (Modular Trading Interface)
+# API Verbindung testen
+python test_live_api_connection.py
 
-# Live Trading Bot mit Audio Alerts
-START_COMPLETE_SYSTEM_WITH_AUDIO.bat
-
-# Oder einzeln:
-python live_trading_bot_clean.py  # Trading Bot
-streamlit run monitoring/advanced_live_dashboard.py --server.port 8501  # Dashboard
+# Enhanced Live Bot starten
+python enhanced_live_bot.py
 ```
 
 ---
 
-## 🧠 Enhanced Smart Money Strategy
+## 📊 **Enhanced Smart Money Strategy**
 
-### Kern-Features
-- **Market Regime Detection**: Automatische Bull/Bear/Sideways Erkennung
-- **Adaptive Parameters**: Strategieanpassung je nach Marktphase
-- **Liquidity Zone Detection**: ML-basierte Liquiditätszonen-Erkennung
-- **Order Flow Analysis**: Smart Money Aktivitäts-Tracking
-- **Pattern Recognition**: Bullish/Bearish Engulfing, Doji, Hammer
-- **Session-based Multipliers**: London/NY/Asia Trading-Sessions
-- **Auto-Confidence Filtering**: Nur Signale >0.5 Confidence werden gehandelt
+### **🧠 Market Regime Detection**
+- **BULL Market**: >2% 24h Change → Long-Positionen
+- **BEAR Market**: <-2% 24h Change → Short-Positionen  
+- **SIDEWAYS Market**: -2% bis +2% → Wartet auf Setup
 
-### Performance Vergleich
-| Metrik | Classic Strategy | Enhanced Strategy | Verbesserung |
-|--------|------------------|-------------------|--------------|
-| **Total Return** | +7.8% | +17.8% | **+128%** |
-| **Win Rate** | 68% | 81% | **+13%** |
-| **Max Drawdown** | 18% | 11% | **-39%** |
-| **Trade Efficiency** | 89 trades | 75 trades | **Higher Quality** |
+### **💰 Risk Management**
+- **Startkapital**: 50€ (konfigurierbar)
+- **Risk per Trade**: 2% = ~1€ pro Position
+- **Stop Loss**: 2% unter/über Entry
+- **Take Profit**: 4% über/unter Entry
+- **Max Drawdown**: 20%
 
-### Market Regime Anpassungen
-```python
-# Bull Market Mode
-- Volume Threshold: 100k → 80k (-20% less restrictive)
-- Risk-Reward: 1.5:1 → 1.8:1 (+20% higher targets)
+### **⚡ Real-time Features**
+- **30-Sekunden-Zyklen**: Kontinuierliche Marktanalyse
+- **Live Bybit Preise**: Echte Mainnet-Daten
+- **Adaptive Strategy**: Passt sich an Marktbedingungen an
+- **Command Interface**: Start/Stop/Pause via JSON Commands
 
-# Bear Market Mode  
-- Volume Threshold: 100k → 120k (+20% more restrictive)
-- Risk-Reward: 1.5:1 → 1.4:1 (-10% more conservative)
+---
 
-# Sideways Market Mode
-- Volume Threshold: 100k → 150k (+50% very selective)
-- Risk-Reward: 1.5:1 (standard)
+## 🏗️ **Architektur**
+
+### **Core Files**
+```
+enhanced_live_bot.py          # 🚀 Haupt-Trading-Bot
+test_live_api_connection.py   # 🔧 API-Verbindung testen
+exchange/bybit_api.py         # 📡 Bybit V5 API Integration
+core/bot_status_monitor.py    # 📊 Status & Monitoring
+.env.example                  # ⚙️ Konfiguration Template
+```
+
+### **Strategy Components**
+- **Market Regime Detection**: Bull/Bear/Sideways Erkennung
+- **Enhanced Signal Generation**: Smart Money Patterns
+- **Risk Management**: Dynamic Position Sizing
+- **Order Execution**: Echte Bybit Mainnet Orders
+
+---
+
+## 📈 **Live Trading Example**
+
+```
+==================================================
+ENHANCED SMART MONEY LIVE TRADING BOT - MAINNET
+==================================================
+Mode: MAINNET (Echte Trades)
+Strategy: Enhanced Smart Money
+Startkapital: $50.00
+==================================================
+2025-06-07 12:59:50 - INFO - [SUCCESS] Connected to Bybit Mainnet | BTC Price: $105,133.00
+2025-06-07 12:59:50 - INFO - BTC Price: $105,133.00 | 24h Change: +1.38% | Regime: SIDEWAYS (Confidence: 0.60)
+2025-06-07 12:59:51 - INFO - Signal: HOLD (No valid setup)
+2025-06-07 12:59:51 - INFO - Waiting 30 seconds for next analysis...
 ```
 
 ---
 
-## 📊 Live Trading Configuration
+## ⚙️ **Konfiguration**
 
-### 🏆 AKTUELLE MAINNET KONFIGURATION
-```python
-# LIVE MAINNET SETTINGS (50-83 EUR Trading)
-TESTNET=false  # ← MAINNET AKTIV
-INITIAL_BALANCE=83.38  # USDT
-RISK_PER_TRADE=2%  # Max 1.67 USD per Trade
-MIN_CONFIDENCE=0.5  # Nur starke Signale
-TRADE_INTERVAL=120s  # 2 Minuten zwischen Analysen
-SESSION_DURATION=480min  # 8 Stunden Auto-Trading
-```
-
-### Live Performance Metriken
-- **Balance**: 83.38 USDT (Live)
-- **Max Risk per Trade**: ~1.67 USD (2%)
-- **Trading Frequency**: Alle 2 Minuten Analyse
-- **Signal Threshold**: >0.5 Confidence
-- **Session Duration**: 8 Stunden (480 Minuten)
-- **Current Status**: ✅ **AKTIV UND TRADING**
-
-## 📊 Advanced Live Trading Dashboard
-
-### 🚀 **PROFESSIONAL TRADING INTERFACE** 
-Das Advanced Dashboard bietet eine vollständige Trading-Platform-Erfahrung:
-
-#### 📸 Dashboard Vorschau
-
-| Feature | Screenshot |
-|---------|------------|
-| **Vollständiges Dashboard** | ![Dashboard Overview](https://raw.githubusercontent.com/develcrystal/Crypto-Trading-Bot-V2/main/assets/images/dashboard-overview.png) |
-| **Smart Money Chart** | ![Smart Money Chart](https://raw.githubusercontent.com/develcrystal/Crypto-Trading-Bot-V2/main/assets/images/smart-money-chart.png) |
-| **Live Order Book** | ![Order Book](https://raw.githubusercontent.com/develcrystal/Crypto-Trading-Bot-V2/main/assets/images/order-book.png) |
-| **Portfolio & Trading Controls** | ![Portfolio](https://raw.githubusercontent.com/develcrystal/Crypto-Trading-Bot-V2/main/assets/images/portfolio-controls.png) |
-
-*Hinweis: Die Screenshots zeigen das Live-Trading-Interface mit echten Marktdaten.*
-
----
-
-### 📊 **HAUPTFUNKTIONEN**
-
-#### **📈 Live Charts & Market Data:**
-- ✅ **Professional Candlestick Charts** mit EMA-Lines & Volume
-- ✅ **Live Order Book** Visualization (Real-time Bids/Asks)
-- ✅ **Real-time BTC Price** mit 24h Change & Spreads
-- ✅ **Technical Indicators** (EMA20, EMA50, Volume Analysis)
-- ✅ **Market Depth** Charts & Liquidity Analysis
-
-#### **🎮 Trading Controls:**
-- ✅ **Bot Control Interface** (Start/Stop/Pause Trading)
-- ✅ **Emergency Stop Button** (Sofortiger Handel-Stopp)
-- ✅ **Manual Trading** BUY/SELL Buttons für Override
-- ✅ **Risk Management** Slider (Risk per Trade, Max Drawdown)
-- ✅ **Strategy Parameter** Live-Adjustment
-
-#### **💰 Live Portfolio Monitoring:**
-- ✅ **Echte $83.38 USDT** Balance Integration (Mainnet)
-- ✅ **Live P&L Tracking** mit Prozent-Änderungen
-- ✅ **Position Monitoring** (LONG/SHORT/None mit Exposure)
-- ✅ **Risk Level Gauges** mit visuellen Warnsystemen
-- ✅ **Balance Breakdown** (USDT, BTC, andere Coins)
-
-#### **⚡ Live Signal System:**
-- ✅ **Signal Detection** (Strong/Medium/Weak/None)
-- ✅ **4-Filter Status Breakdown** (Volume, Levels, Pattern, Order Flow)
-- ✅ **Signal Quality Indicator** mit Confidence Levels
-- ✅ **Market Regime Detection** (Bull/Bear/Sideways) Live Display
-
-### Dashboard Zugriff
+### **Environment Variables (.env)**
 ```bash
-# Modular Dashboard starten
-START_MODULAR_DASHBOARD.bat
+# 🔑 API Configuration
+BYBIT_API_KEY=your_api_key_here
+BYBIT_API_SECRET=your_api_secret_here
+TESTNET=false
 
-# Oder manuell:
-python launch_modular_dashboard.py
-# Browser: http://localhost:8505
+# 💰 Trading Parameters
+INITIAL_PORTFOLIO_VALUE=50
+MAX_RISK_PER_TRADE=0.02
+MAX_DRAWDOWN=0.15
+DAILY_RISK_LIMIT=5.0
+
+# 🧠 Strategy Parameters
+RISK_REWARD_RATIO=1.5
+VOLATILITY_THRESHOLD=0.02
+VOLUME_THRESHOLD=100000
+```
+
+### **Key Parameters**
+- **TESTNET**: false = Mainnet (echte Trades), true = Testnet
+- **INITIAL_PORTFOLIO_VALUE**: Startkapital in USD
+- **MAX_RISK_PER_TRADE**: 0.02 = 2% Risiko pro Trade
+- **VOLUME_THRESHOLD**: Mindestvolumen für Trades
+
+---
+
+## 🔧 **PowerShell Commands**
+
+### **API Test & Bot Start**
+```powershell
+cd path\to\crypto-trading-bot-v4; python test_live_api_connection.py; python enhanced_live_bot.py
+```
+
+### **Live Monitoring**
+```powershell
+cd path\to\crypto-trading-bot-v4; while($true) { Clear-Host; Write-Host "=== LIVE BOT STATUS ===" -ForegroundColor Cyan; if(Test-Path "live_trading_bot.log") { Get-Content -Path "live_trading_bot.log" -Tail 15 }; Start-Sleep 5 }
+```
+
+### **Bot Control**
+```powershell
+# Bot stoppen
+echo '{"command": "STOP", "timestamp": '$(Get-Date -UFormat %s)'}' | Out-File -FilePath "bot_commands.json" -Encoding utf8
+
+# Trading pausieren
+echo '{"command": "PAUSE", "timestamp": '$(Get-Date -UFormat %s)'}' | Out-File -FilePath "bot_commands.json" -Encoding utf8
 ```
 
 ---
 
-## 🎵 Audio Alert System
+## 📊 **Performance Tracking**
 
-### 🔊 **WINDOWS SOUND INTEGRATION**
-Der Bot verfügt über ein vollständig integriertes Audio-Alert System:
+### **Live Metrics**
+- **Real-time P&L**: Kontinuierliche Gewinn/Verlust-Berechnung
+- **Trade History**: Alle Trades mit Timestamps und Reasoning
+- **Market Regime History**: Verlauf der Marktphasen-Erkennung
+- **Status Monitoring**: Bot-Status, API-Verbindung, Fehler
 
-#### **Trading Event Sounds:**
-- 🚀 **Bot Startup**: Aufsteigende Startup-Melodie
-- 🎯 **BUY Signal**: 2x hohe Töne (1000Hz + 1200Hz) + Celebration
-- 🎯 **SELL Signal**: 2x tiefe Töne (600Hz + 400Hz) + Alert Sound
-- ✅ **Trade Success**: Windows Success Sound + Profit Celebration
-- ❌ **Trade Failed**: Windows Error Sound + Loss Alert
-- 😐 **No Signal**: Kurzer tiefer Ton (200Hz, 50ms)
-- 🛑 **Bot Shutdown**: Absteigende Shutdown-Melodie
-
-#### **Audio-Enhanced Trading:**
-```bash
-# Bot starten mit Audio Alerts
-START_COMPLETE_SYSTEM_WITH_AUDIO.bat
-
-# Audio System testen
-python test_audio_alerts.py
-```
-
-**Alle Trading-Events werden durch entsprechende Sounds begleitet für optimale Überwachung!**
+### **Logging**
+- **live_trading_bot.log**: Alle Trading-Aktivitäten
+- **bot_status.json**: Aktueller Bot-Status
+- **Trade Records**: Detaillierte Trade-Informationen
 
 ---
 
-### Dashboard Features ✅ LIVE
-- **Live BTC Price**: $107,418.00 (+1.26%)
-- **Real-time Order Book**: Live Bid/Ask Spreads
-- **Trading Volume**: 7,574 BTC (24h)
-- **Portfolio Tracking**: Live Balance Updates
-- **Signal Monitoring**: Real-time Confidence Levels
-- **Risk Management**: Live Risk Metrics
+## 🛡️ **Sicherheit**
 
-### Dashboard Zugriff
-```bash
-# Dashboard starten
-python launch_modular_dashboard.py
+### **API Security**
+- **HMAC SHA256**: Echte Bybit V5 API-Authentifizierung
+- **Environment Variables**: Keine Hardcoded API Keys
+- **Rate Limiting**: Respektiert Bybit API-Limits
+- **Error Handling**: Robuste Fehlerbehandlung
 
-# Browser öffnet automatisch: http://localhost:8505
-```
+### **Risk Management**
+- **Position Limits**: Max 50% des Kapitals pro Trade
+- **Stop Loss**: Automatische 2% Stop Loss
+- **Daily Limits**: Maximales tägliches Risiko
+- **Emergency Stop**: Sofortiger Bot-Stopp möglich
 
 ---
 
-## 🔧 System Architecture
+## 🚀 **Deployment Guide**
 
-### Live Trading Components
-1. **`live_trading_bot_clean.py`** - Hauptbot ohne Unicode-Probleme
-2. **`ui/main_dashboard.py`** - Real-time Dashboard (Modular)
-3. **`START_LIVE_TRADING_MAINNET.bat`** - Ein-Klick Deployment
-4. **Enhanced Strategy Engine** - Smart Money Algorithmus
-5. **Real-time API Integration** - Bybit V5 Live Connection
+### **1. Bybit Account Setup**
+1. Account auf [bybit.com](https://bybit.com) erstellen
+2. API Key mit Trading-Rechten erstellen
+3. IP-Restriction für zusätzliche Sicherheit (optional)
 
-### Solved Technical Issues ✅
-- **Unicode Encoding**: Alle Console-Probleme behoben
-- **API Authentication**: HMAC SHA256 perfekt funktionsfähig
-- **Auto-Start Logic**: Keine manuelle Eingabe erforderlich
-- **Dashboard Connection**: Live-Daten ohne Verbindungsfehler
-- **MAINNET Configuration**: Echte Orders werden erfolgreich platziert
+### **2. Bot Configuration**
+1. `.env` Datei mit API Keys konfigurieren
+2. Startkapital und Risk-Parameter anpassen
+3. API-Verbindung testen: `python test_live_api_connection.py`
 
----
-
-## 📁 Projektstruktur
-
-```
-crypto-bot_V2/
-├── 🚀 live_trading_bot_clean.py    # LIVE MAINNET BOT (Unicode-frei)
-├── 📊 START_MODULAR_DASHBOARD.bat  # Ein-Klick Start für modulares Dashboard
-├──
-├── ui/
-│   ├── main_dashboard.py           # Haupt-Dashboard (Orchestriert Module)
-│   ├── components/                 # Modulare UI-Komponenten
-│   │   ├── data_manager.py         # Session State & API
-│   │   └── layout_manager.py       # Styling & Theme
-│   └── widgets/                    # Modulare UI-Widgets
-│       ├── order_book.py           # Bids/Asks Visualization
-│       ├── portfolio_monitor.py    # Balance & Risk Tracking
-│       ├── price_widget.py         # Live BTC Preise
-│       └── trading_controls.py     # Bot Controls & Signale
-├──
-├── strategies/
-│   ├── smart_money.py              # Smart Money Strategy
-│   └── enhanced_smart_money.py     # Enhanced Version
-├──
-├── exchange/
-│   └── bybit_api.py                # Bybit V5 API (100% funktional)
-├──
-├── config/
-│   └── config.py                   # Live-optimierte Konfiguration
-├──
-└── .env                            # MAINNET Credentials (TESTNET=false)
-```
+### **3. Live Trading**
+1. Mit kleinem Kapital starten (50€ empfohlen)
+2. Bot kontinuierlich überwachen
+3. Performance evaluieren und Parameter anpassen
 
 ---
 
-## 🎯 Live Trading Workflow
+## 📋 **Requirements**
 
-### Automatischer Trading Prozess
+### **Python Dependencies**
 ```
-1. Bot Start → API Connection Test → Balance Check
-2. Market Analysis (alle 2 Minuten)
-3. Smart Money Signal Generation
-4. Confidence Evaluation (>0.5 required)
-5. Trade Execution (wenn Signal stark genug)
-6. Risk Management & Position Sizing
-7. Real-time Dashboard Update
-8. Loop fortsetzung für 8 Stunden
+requests>=2.28.0
+python-dotenv>=0.19.0
+psutil>=5.8.0
+pyyaml>=6.0
 ```
 
-### Signal Beispiel (Live)
-```
-[21:01:46] Analyzing market...
-Smart Money Signal: SELL (Confidence: 0.40)
-Price: $107,418.80 | 24h Change: -1.33%
-Signal too weak (Confidence: 0.40) - Skipping trade
-Waiting 2 minutes for next analysis...
-```
-
----
-
-## 🛡️ Sicherheit & Risiko
-
-### Live Trading Sicherheit ✅
-- **Testnet First**: Ausgiebig getestet auf Testnet
-- **Kleine Positionen**: Max 2% Risiko pro Trade (~1.67 USD)
-- **Confidence Filtering**: Nur >0.5 Confidence Signale
-- **Auto-Stop**: 8-Stunden Session Limit
-- **API Security**: Verschlüsselte Credentials
-- **Real-time Monitoring**: Live Dashboard Überwachung
-
-### Risk Management
-- **Max Risk per Trade**: 2% (1.67 USD bei 83.38 USDT)
-- **Daily Risk Limit**: 5 USD Maximum
-- **Max Drawdown**: 15% (12.51 USD)
-- **Position Size**: Dynamic basierend auf Volatilität
-- **Emergency Controls**: Dashboard Stop-Buttons
-
----
-
-## 🏆 Live Deployment Success
-
-### 📊 **AKTUELLER STATUS (25.05.2025 21:05)**
-```
-✅ MAINNET BOT: AKTIV (PID: 10352)
-✅ DASHBOARD: LÄUFT (Port 8501)
-✅ BALANCE: 83.38 USDT
-✅ API STATUS: Verbunden und funktional
-✅ TRADING MODE: Auto (8h Session)
-✅ SIGNAL DETECTION: Aktiv (2min Intervall)
-✅ RISK MANAGEMENT: Aktiv (2% per Trade)
-```
-
-### Live Performance Monitoring
-- **Start Time**: 25.05.2025 21:01:46
-- **Session Duration**: 480 Minuten (8 Stunden)
-- **End Time**: 26.05.2025 05:01:46 (automatisch)
-- **Current Signals**: Monitoring kontinuierlich
-- **Trade Threshold**: >0.5 Confidence erforderlich
-
----
-
-## 🔮 Roadmap
-
-### ✅ Abgeschlossen (Mai 2025)
-- Bybit V5 API Integration (100% funktional)
-- Enhanced Smart Money Strategy Implementation
-- Real-time Dashboard mit Live-Daten
-- Unicode Console Probleme vollständig gelöst
-- Auto-Start System für 8h Trading Sessions
-- **LIVE MAINNET DEPLOYMENT ERFOLGREICH**
-
-### 🔄 In Entwicklung
-- WebSocket Real-time Data Integration
-- Advanced ML Models für bessere Signale
-- Multi-Symbol Trading (ETH, SOL, etc.)
-- Portfolio Management Tools
-- Telegram/Discord Live Notifications
-
-### 🎯 Geplant
-- Mobile App Integration
-- Cloud Deployment (AWS/GCP)  
-- Social Trading Features
-- Institutional-grade Risk Management
-- Multi-Exchange Arbitrage
-
----
-
-## 💻 System Requirements
-
-### Minimum Requirements
+### **System Requirements**
 - **Python**: 3.8+
-- **RAM**: 4GB
-- **Storage**: 2GB
-- **Internet**: Stabile Verbindung für Live-Trading
-- **OS**: Windows 10+ (getestet), Linux, macOS
-
-### Recommended for Live Trading
-- **Python**: 3.10+
-- **RAM**: 8GB+
-- **SSD Storage**: Für schnelle I/O
-- **Stable Internet**: <100ms Latenz zu Bybit
-- **Monitoring**: Zusätzlicher Bildschirm für Dashboard
+- **OS**: Windows 10/11, macOS, Linux
+- **Internet**: Stabile Verbindung für API-Calls
+- **Memory**: Min 256MB RAM
 
 ---
 
-## 📞 Support & Community
+## 🤝 **Contributing**
 
-### Live Trading Support
-- **GitHub Issues**: [Link](https://github.com/develcrystal/Crypto-Trading-Bot-V2/issues)
-- **Bybit API Docs**: [Link](https://bybit-exchange.github.io/docs/v5/intro)
-- **Live Status Updates**: Check Dashboard bei localhost:8501
-
-### Dokumentation
-- **Live Trading Guide**: `LIVE_DEPLOYMENT_SUCCESS.md`
-- **Dashboard Manual**: `monitoring/README_ADVANCED_DASHBOARD.md`
-- **API Integration**: `exchange/API_INTEGRATION_GUIDE.md`
-- **Risk Management**: `RISK_MANAGEMENT_LIVE.md`
+1. Fork das Repository
+2. Erstelle einen Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit deine Änderungen (`git commit -m 'Add some AmazingFeature'`)
+4. Push zum Branch (`git push origin feature/AmazingFeature`)
+5. Erstelle einen Pull Request
 
 ---
 
-## ⚖️ Disclaimer
+## 📞 **Support**
 
-⚠️ **WICHTIGER HINWEIS FÜR LIVE TRADING**: Diese Software führt echte Trades mit echtem Geld durch. Der Handel mit Kryptowährungen ist hochriskant und kann zum Totalverlust führen.
-
-### Live Trading Verantwortung
-- ✅ **NUR mit Geld handeln, das Sie sich leisten können zu verlieren**
-- ✅ **System kontinuierlich überwachen** (Dashboard verwenden)
-- ✅ **Verstehen Sie die Strategie** bevor Sie live gehen
-- ✅ **Starten Sie mit kleinen Beträgen** (wie unsere 83 USDT)
-- ✅ **Diese Software bietet keine Anlageberatung**
-- ✅ **Die Autoren übernehmen keine Haftung** für Verluste
-
-### Success Disclaimer
-**Das System läuft erfolgreich live, aber vergangene Performance garantiert keine zukünftigen Ergebnisse. Handeln Sie verantwortungsvoll!**
+- **Issues**: [GitHub Issues](https://github.com/yourusername/crypto-trading-bot-v4/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/yourusername/crypto-trading-bot-v4/discussions)
+- **Documentation**: Siehe `docs/` Verzeichnis
 
 ---
 
-## 📄 Lizenz
+## ⚖️ **Disclaimer**
+
+⚠️ **WICHTIGER HINWEIS**: Diese Software dient nur zu Bildungszwecken. Der Handel mit Kryptowährungen ist hochriskant und kann zum Totalverlust führen.
+
+- ✅ Testen Sie immer zuerst auf Testnet
+- ✅ Investieren Sie nur, was Sie sich leisten können zu verlieren
+- ✅ Diese Software bietet keine Anlageberatung
+- ✅ Die Autoren übernehmen keine Haftung für Verluste
+
+---
+
+## 📄 **Lizenz**
 
 MIT License - Siehe [LICENSE](LICENSE) für Details.
 
-**© 2025 Romain Hill** - Alle Rechte vorbehalten.
+**© 2025 Crypto Trading Bot V4** - Production Ready Trading Solution
 
 ---
 
-## 🚀 Ready for Live Trading!
+## 🎯 **Was macht V4 besonders?**
 
-```bash
-# LIVE DEPLOYMENT - Ein Kommando:
-git clone https://github.com/develcrystal/Crypto-Trading-Bot-V2.git
-cd Crypto-Trading-Bot-V2
-pip install -r requirements.txt
-# Configure .env with your Mainnet API keys
-python live_trading_bot_clean.py
-```
+- **🔥 Endlich funktionsfähig**: Keine Dummy-Implementierungen mehr
+- **💰 Echtes Mainnet Trading**: Wirkliche Bybit-Integration
+- **🧠 Smart Strategy**: Market Regime Detection
+- **🛡️ Professionelle Security**: HMAC-Authentifizierung
+- **📊 Live Monitoring**: Real-time Status und Performance
+- **🚀 Production Ready**: Bereit für echtes Trading
 
-**🎯 Live Trading seit 25.05.2025 - System bewiesen und funktional!** 📈💰
-
----
-
-### 📊 **LIVE STATUS BADGE**
-![Live Trading](https://img.shields.io/badge/Live%20Trading-ACTIVE-brightgreen.svg)
-![Mainnet](https://img.shields.io/badge/Mainnet-DEPLOYED-orange.svg) 
-![Balance](https://img.shields.io/badge/Balance-83.38%20USDT-blue.svg)
-![Uptime](https://img.shields.io/badge/Uptime-SEIT%2025.05.2025-green.svg)
+**Ready to trade? Let's make money! 📈**

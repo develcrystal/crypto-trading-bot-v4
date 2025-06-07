@@ -1,10 +1,4 @@
-pandas
-numpy
-matplotlib
-scikit-learn
-pytz
-pytest
-python-dotenv
-seaborn
-mplfinance
-tqdm
+requests>=2.28.0
+python-dotenv>=0.19.0
+psutil>=5.8.0
+pyyaml>=6.0

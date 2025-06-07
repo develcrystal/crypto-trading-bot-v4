@@ -42,9 +42,11 @@ class BybitAPI:
         
         # Basis-URLs basierend auf Testnet/Mainnet
         if testnet:
+            # Testnet URLs
             self.base_url = "https://api-testnet.bybit.com"
             self.ws_url = "wss://stream-testnet.bybit.com"
         else:
+            # MAINNET URLs (für echte Trades)
             self.base_url = "https://api.bybit.com"
             self.ws_url = "wss://stream.bybit.com"
             
